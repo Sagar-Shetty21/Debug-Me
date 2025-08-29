@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>Network Tab — DevTools Exercises</title>
+        <style>
+            :root {
+                --bg: #0f1724;
+                --card: #0b1220;
+                --muted: #94a3b8;
+                --accent: #60a5fa;
+            }
+            html,
+            body {
+                height: 100%;
+                margin: 0;
+                font-family: Inter, ui-sans-serif, system-ui, Segoe UI, Roboto,
+                    "Helvetica Neue", Arial;
+            }
+            body {
+                background: linear-gradient(180deg, #071026 0%, #071826 60%);
+                color: #e6eef8;
+                padding: 28px;
+            }
+            .wrap {
+                max-width: 1100px;
+                margin: 0 auto;
+            }
+            header {
+                display: flex;
+                gap: 16px;
+                align-items: center;
+            }
+            h1 {
+                font-size: 20px;
+                margin: 0;
+            }
+            p.lead {
+                color: var(--muted);
+                margin: 6px 0 18px;
+            }
+            .grid {
+                display: grid;
+                grid-template-columns: 360px 1fr;
+                gap: 18px;
+            }
+            .card {
+                background: var(--card);
+                padding: 14px;
+                border-radius: 12px;
+                box-shadow: 0 6px 24px rgba(2, 6, 23, 0.6);
+            }
+            label {
+                display: block;
+                font-size: 12px;
+                color: var(--muted);
+                margin-bottom: 6px;
+            }
+            select,
+            input,
+            textarea {
+                width: 100%;
+                padding: 8px;
+                border-radius: 8px;
+                border: 1px solid rgba(255, 255, 255, 0.04);
+                background: transparent;
+                color: inherit;
+            }
+            button {
+                background: var(--accent);
+                border: none;
+                padding: 10px 12px;
+                border-radius: 10px;
+                color: #042034;
+                cursor: pointer;
+                font-weight: 600;
+            }
+            .btn-ghost {
+                background: transparent;
+                border: 1px solid rgba(255, 255, 255, 0.06);
+                color: var(--muted);
+            }
+            .controls {
+                display: flex;
+                gap: 8px;
+                margin-top: 8px;
+            }
+            .log {
+                height: 420px;
+                overflow: auto;
+                background: #020617;
+                padding: 12px;
+                border-radius: 8px;
+                font-family: monospace;
+                font-size: 13px;
+                border: 1px solid rgba(255, 255, 255, 0.03);
+            }
+            .entry {
+                padding: 8px;
+                border-bottom: 1px dashed rgba(255, 255, 255, 0.02);
+            }
+            .meta {
+                font-size: 12px;
+                color: var(--muted);
+            }
+            .timeline {
+                height: 48px;
+                background: linear-gradient(90deg, #052432, #06122a);
+                border-radius: 6px;
+                margin-top: 8px;
+                padding: 6px;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+            .bar {
+                height: 20px;
+                border-radius: 4px;
+                background: linear-gradient(90deg, #60a5fa, #7dd3fc);
+            }
+            code {
+                background: rgba(255, 255, 255, 0.02);
+                padding: 6px;
+                border-radius: 6px;
+            }
+            .split {
+                display: flex;
+                gap: 12px;
+            }
+            .small {
+                font-size: 13px;
+                color: var(--muted);
+            }
+            footer {
+                margin-top: 18px;
+                color: var(--muted);
+                font-size: 13px;
+            }
+            .hint {
+                background: linear-gradient(
+                    90deg,
+                    rgba(96, 165, 250, 0.06),
+                    rgba(125, 211, 252, 0.03)
+                );
+                padding: 10px;
+                border-radius: 8px;
+                color: var(--muted);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="wrap">
+            <header>
+                <div>
+                    <h1>Network Tab — Interactive Exercises</h1>
+                    <p class="lead">
+                        Practice inspecting requests, responses, headers,
+                        throttling, caching, and failure modes using these
+                        interactive samples.
+                    </p>
+                </div>
+            </header>
+
+            <div class="grid" style="margin-top: 12px">
+                <aside class="card">
+                    <label for="method">Request</label>
+                    <div class="split">
+                        <select id="method" aria-label="HTTP method">
+                            <option>GET</option>
+                            <option>POST</option>
+                            <option>PUT</option>
+                            <option>DELETE</option>
+                        </select>
+                        <input
+                            id="url"
+                            value="https://jsonplaceholder.typicode.com/todos/1"
+                        />
+                    </div>
+
+                    <label style="margin-top: 12px">Body (JSON)</label>
+                    <textarea id="body" rows="5">
+{ "title": "Buy milk", "completed": false }</textarea
+                    >
+
+                    <div class="controls">
+                        <button id="send">Send</button>
+                        <button id="send-slow" class="btn-ghost">
+                            Send (simulate slow)
+                        </button>
+                        <button id="simulate-fail" class="btn-ghost">
+                            Simulate failure
+                        </button>
+                    </div>
+
+                    <div style="margin-top: 12px">
+                        <label>Quick examples</label>
+                        <div style="display: flex; gap: 8px; margin-top: 6px">
+                            <button id="example-1" class="btn-ghost">
+                                Large download
+                            </button>
+                            <button id="example-2" class="btn-ghost">
+                                404 / 500
+                            </button>
+                            <button id="example-3" class="btn-ghost">
+                                CORS test
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 12px">
+                        <label>Tips</label>
+                        <ul class="small">
+                            <li>
+                                Open DevTools → Network to follow requests live.
+                            </li>
+                            <li>
+                                Right-click a request → "Copy → Copy as cURL" to
+                                reproduce requests.
+                            </li>
+                            <li>
+                                Use throttling to simulate slow networks (e.g.,
+                                Slow 3G).
+                            </li>
+                            <li>
+                                Examine Headers, Preview, Response, and Timing
+                                sub-tabs for each request.
+                            </li>
+                        </ul>
+                    </div>
+                </aside>
+
+                <main>
+                    <div class="card">
+                        <h3 style="margin-top: 0">Live Request Log</h3>
+                        <div class="log" id="log" aria-live="polite"></div>
+
+                        <div
+                            class="timeline"
+                            id="timeline"
+                            title="Visual timing bar (DNS, TCP, TTFB, Content)"
+                        >
+                            <div
+                                style="
+                                    flex: 1;
+                                    background: transparent;
+                                    color: var(--muted);
+                                    font-size: 13px;
+                                "
+                            >
+                                Timing visual will appear after a request.
+                            </div>
+                        </div>
+
+                        <div
+                            style="
+                                margin-top: 12px;
+                                display: flex;
+                                gap: 12px;
+                                align-items: center;
+                                justify-content: space-between;
+                            "
+                        >
+                            <div class="small">
+                                Requests made: <span id="count">0</span>
+                            </div>
+                            <div class="small hint">
+                                Try: Open DevTools (F12) and watch the Network
+                                panel while clicking Send — compare the
+                                browser's view with this log.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="height: 12px"></div>
+
+                    <div class="card">
+                        <h3 style="margin-top: 0">Exercises</h3>
+                        <ol class="small">
+                            <li>
+                                Send a GET to
+                                <code
+                                    >https://jsonplaceholder.typicode.com/todos/1</code
+                                >. Inspect headers & response size.
+                            </li>
+                            <li>
+                                Use "Send (simulate slow)" then open the Timing
+                                tab in DevTools. Which phase
+                                (DNS/TCP/TTFB/Content) dominates?
+                            </li>
+                            <li>
+                                Trigger a 500 via
+                                <code>https://httpstat.us/500</code> and check
+                                how the app handles the error.
+                            </li>
+                            <li>
+                                Throttle network (Slow 3G) and compare Load
+                                times and waterfall chart.
+                            </li>
+                            <li>
+                                Right-click a request → "Replay XHR" (or "Copy
+                                as cURL") to reproduce it from CLI.
+                            </li>
+                        </ol>
+                    </div>
+                </main>
+            </div>
+
+            <footer>
+                <div class="card">
+                    <strong>How this page measures timing</strong>
+                    <p class="small">
+                        This page records high-level timing using
+                        <code>performance.now()</code> and the Fetch API. It
+                        cannot replace the browser's detailed network waterfall
+                        (DNS, TCP) but provides a reproducible demo for
+                        inspecting headers, payloads, and failures.
+                    </p>
+                    <p class="small">
+                        Recommended: open Chrome DevTools & compare this page's
+                        log with DevTools → Network.
+                    </p>
+                </div>
+            </footer>
+        </div>
+
+        <script>
+            const logEl = document.getElementById("log");
+            const countEl = document.getElementById("count");
+            const timelineEl = document.getElementById("timeline");
+            let count = 0;
+
+            function appendLog(obj) {
+                count++;
+                countEl.textContent = count;
+                const div = document.createElement("div");
+                div.className = "entry";
+                div.innerHTML = `
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                        <div><strong>${
+                            obj.method
+                        }</strong> <span class="meta">${obj.url}</span></div>
+                        <div class="meta">${obj.statusText || "—"} • ${
+                    obj.duration ? obj.duration.toFixed(1) + " ms" : "—"
+                }</div>
+                    </div>
+                    <div style="margin-top:6px"><span class="meta">Status: ${
+                        obj.status
+                    }</span> <span class="meta" style="margin-left:12px">Size: ${
+                    obj.sizeReadable || "—"
+                }</span></div>
+                    <details style="margin-top:8px"><summary class="small">Request & Response (click)</summary>
+                        <pre style="white-space:pre-wrap;margin-top:8px;font-size:12px">${
+                            obj.preview || ""
+                        }</pre>
+                    </details>
+                `;
+                logEl.prepend(div);
+            }
+
+            function humanBytes(bytes) {
+                if (!bytes && bytes !== 0) return "—";
+                const units = ["B", "KB", "MB", "GB"];
+                let i = 0;
+                while (bytes >= 1024 && i < units.length - 1) {
+                    bytes /= 1024;
+                    i++;
+                }
+                return bytes.toFixed(1) + " " + units[i];
+            }
+
+            async function sendRequest({
+                method,
+                url,
+                body,
+                simulateSlow = false,
+                simulateFail = false,
+            }) {
+                const start = performance.now();
+                const headers = { Accept: "application/json" };
+                if (method !== "GET" && method !== "HEAD")
+                    headers["Content-Type"] = "application/json";
+
+                let fetchUrl = url;
+                if (simulateFail) {
+                    // use httpstat.us to return defined status codes
+                    fetchUrl = "https://httpstat.us/500?sleep=800";
+                }
+                if (simulateSlow) {
+                    // use httpstat.us to delay
+                    fetchUrl = fetchUrl.includes("?")
+                        ? fetchUrl + "&sleep=1200"
+                        : fetchUrl + "?sleep=1200";
+                }
+
+                try {
+                    const resp = await fetch(fetchUrl, {
+                        method,
+                        headers,
+                        body: method === "GET" ? undefined : body,
+                    });
+                    const duration = performance.now() - start;
+                    let size = null;
+                    let preview = "";
+                    try {
+                        const contentType =
+                            resp.headers.get("content-type") || "";
+                        if (contentType.includes("application/json")) {
+                            const json = await resp.clone().json();
+                            preview = JSON.stringify(json, null, 2);
+                            size = new TextEncoder().encode(preview).length;
+                        } else {
+                            const text = await resp.clone().text();
+                            preview = text.slice(0, 2000);
+                            size = new TextEncoder().encode(preview).length;
+                        }
+                    } catch (e) {
+                        preview = "[unable to parse body]";
+                    }
+
+                    appendLog({
+                        method,
+                        url: fetchUrl,
+                        status: resp.status,
+                        statusText: resp.statusText,
+                        duration,
+                        sizeReadable: humanBytes(size),
+                        preview,
+                    });
+                    drawTimingBar(duration);
+                } catch (err) {
+                    const duration = performance.now() - start;
+                    appendLog({
+                        method,
+                        url: fetchUrl,
+                        status: "ERR",
+                        statusText: err.message,
+                        duration,
+                        preview: err.stack,
+                    });
+                    drawTimingBar(duration, true);
+                }
+            }
+
+            function drawTimingBar(ms, errored = false) {
+                const width = Math.min(1000, Math.max(40, ms));
+                timelineEl.innerHTML = "";
+                const bar = document.createElement("div");
+                bar.className = "bar";
+                bar.style.width = Math.max(10, width / 10) + "%";
+                bar.title = ms.toFixed(1) + " ms";
+                if (errored) bar.style.filter = "grayscale(60%)";
+                timelineEl.appendChild(bar);
+                const meta = document.createElement("div");
+                meta.className = "small";
+                meta.style.marginLeft = "8px";
+                meta.textContent = "Elapsed: " + ms.toFixed(1) + " ms";
+                timelineEl.appendChild(meta);
+            }
+
+            document.getElementById("send").addEventListener("click", () => {
+                const method = document.getElementById("method").value;
+                const url = document.getElementById("url").value;
+                const body = document.getElementById("body").value;
+                sendRequest({ method, url, body });
+            });
+
+            document
+                .getElementById("send-slow")
+                .addEventListener("click", () => {
+                    const method = document.getElementById("method").value;
+                    const url = document.getElementById("url").value;
+                    const body = document.getElementById("body").value;
+                    sendRequest({ method, url, body, simulateSlow: true });
+                });
+
+            document
+                .getElementById("simulate-fail")
+                .addEventListener("click", () => {
+                    const method = document.getElementById("method").value;
+                    sendRequest({
+                        method,
+                        url: document.getElementById("url").value,
+                        simulateFail: true,
+                    });
+                });
+
+            document
+                .getElementById("example-1")
+                .addEventListener("click", () => {
+                    // large download from picsum
+                    document.getElementById("url").value =
+                        "https://picsum.photos/2000/2000";
+                    document.getElementById("method").value = "GET";
+                });
+            document
+                .getElementById("example-2")
+                .addEventListener("click", () => {
+                    document.getElementById("url").value =
+                        "https://httpstat.us/404";
+                    document.getElementById("method").value = "GET";
+                });
+            document
+                .getElementById("example-3")
+                .addEventListener("click", () => {
+                    document.getElementById("url").value =
+                        "https://httpbin.org/anything";
+                    document.getElementById("method").value = "GET";
+                });
+
+            // Accessibility: keyboard shortcut to send (Ctrl+Enter)
+            document.addEventListener("keydown", (e) => {
+                if (e.ctrlKey && e.key === "Enter")
+                    document.getElementById("send").click();
+            });
+
+            // Reset log every hour to keep things tidy
+            setInterval(() => {
+                logEl.innerHTML = "";
+                count = 0;
+                countEl.textContent = 0;
+                timelineEl.innerHTML = "";
+            }, 1000 * 60 * 60);
+        </script>
+    </body>
+</html>

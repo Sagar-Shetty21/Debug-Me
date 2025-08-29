@@ -1,0 +1,1578 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Console Tab Debugging | Debug-Me</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                line-height: 1.6;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                color: #333;
+            }
+
+            .container {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+
+            header {
+                text-align: center;
+                margin-bottom: 40px;
+                color: white;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+                margin-bottom: 10px;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            }
+
+            .subtitle {
+                font-size: 1.1rem;
+                opacity: 0.9;
+            }
+
+            .console-warning {
+                background: linear-gradient(
+                    135deg,
+                    #ff9a9e 0%,
+                    #fecfef 50%,
+                    #fecfef 100%
+                );
+                border-radius: 15px;
+                padding: 20px;
+                margin-bottom: 30px;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            }
+
+            .console-warning h2 {
+                color: #8b0000;
+                margin-bottom: 10px;
+            }
+
+            .console-warning p {
+                color: #333;
+                font-weight: 500;
+            }
+
+            .section {
+                background: rgba(255, 255, 255, 0.95);
+                border-radius: 15px;
+                padding: 30px;
+                margin-bottom: 30px;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            }
+
+            .section h2 {
+                color: #667eea;
+                margin-bottom: 20px;
+                font-size: 1.8rem;
+            }
+
+            .section h3 {
+                color: #764ba2;
+                margin: 20px 0 15px 0;
+                font-size: 1.3rem;
+            }
+
+            .demo-button {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 1rem;
+                margin: 5px;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            }
+
+            .demo-button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            }
+
+            .demo-button:active {
+                transform: translateY(0);
+            }
+
+            .code-block {
+                background: #2d3748;
+                color: #e2e8f0;
+                padding: 20px;
+                border-radius: 8px;
+                font-family: "Courier New", monospace;
+                margin: 15px 0;
+                overflow-x: auto;
+                border-left: 4px solid #667eea;
+            }
+
+            .demo-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 20px;
+                margin: 20px 0;
+            }
+
+            .demo-card {
+                background: #f8f9fa;
+                border-radius: 10px;
+                padding: 20px;
+                border: 2px solid #e9ecef;
+                transition: all 0.3s ease;
+            }
+
+            .demo-card:hover {
+                border-color: #667eea;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+            }
+
+            .demo-card h4 {
+                color: #667eea;
+                margin-bottom: 10px;
+            }
+
+            .form-group {
+                margin: 15px 0;
+            }
+
+            .form-group label {
+                display: block;
+                margin-bottom: 5px;
+                font-weight: 600;
+                color: #555;
+            }
+
+            .form-group input,
+            .form-group select {
+                width: 100%;
+                padding: 10px;
+                border: 2px solid #ddd;
+                border-radius: 5px;
+                font-size: 1rem;
+            }
+
+            .form-group input:focus,
+            .form-group select:focus {
+                outline: none;
+                border-color: #667eea;
+            }
+
+            .status {
+                padding: 10px;
+                border-radius: 5px;
+                margin: 10px 0;
+                display: none;
+            }
+
+            .status.success {
+                background: #d4edda;
+                color: #155724;
+                border: 1px solid #c3e6cb;
+            }
+
+            .status.error {
+                background: #f8d7da;
+                color: #721c24;
+                border: 1px solid #f5c6cb;
+            }
+
+            .status.info {
+                background: #cce7ff;
+                color: #004085;
+                border: 1px solid #99d3ff;
+            }
+
+            .highlight {
+                background: #fff3cd;
+                padding: 2px 6px;
+                border-radius: 3px;
+                font-family: monospace;
+                font-weight: bold;
+            }
+
+            @media (max-width: 768px) {
+                .container {
+                    padding: 10px;
+                }
+
+                h1 {
+                    font-size: 2rem;
+                }
+
+                .section {
+                    padding: 20px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <header>
+                <h1>🐛 Console Tab Debugging</h1>
+                <p class="subtitle">
+                    Master the Browser Console for Effective JavaScript
+                    Debugging
+                </p>
+            </header>
+
+            <div class="console-warning">
+                <h2>📋 Before You Start</h2>
+                <p>
+                    <strong
+                        >Open your browser's Developer Tools (F12 or
+                        Ctrl/Cmd+Shift+I)</strong
+                    >
+                    and navigate to the
+                    <span class="highlight">Console</span> tab. All debugging
+                    output and examples will appear there!
+                </p>
+            </div>
+
+            <!-- Basic Console Methods -->
+            <div class="section">
+                <h2>1. Basic Console Methods</h2>
+                <p>
+                    Learn the fundamental console methods for different types of
+                    output:
+                </p>
+
+                <div class="demo-grid">
+                    <div class="demo-card">
+                        <h4>Basic Logging</h4>
+                        <button
+                            class="demo-button"
+                            onclick="demoBasicLogging()"
+                        >
+                            Run Basic Logging
+                        </button>
+                        <div class="code-block">
+                            console.log('Hello World!')
+                            console.info('Information message')
+                            console.warn('Warning message') console.error('Error
+                            message')
+                        </div>
+                    </div>
+
+                    <div class="demo-card">
+                        <h4>Variable Inspection</h4>
+                        <button
+                            class="demo-button"
+                            onclick="demoVariableInspection()"
+                        >
+                            Inspect Variables
+                        </button>
+                        <div class="code-block">
+                            const user = { name: 'John', age: 30 }
+                            console.log('User:', user) console.dir(user) //
+                            Detailed object view
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advanced Console Features -->
+            <div class="section">
+                <h2>2. Advanced Console Features</h2>
+
+                <div class="demo-grid">
+                    <div class="demo-card">
+                        <h4>Grouped Logging</h4>
+                        <button
+                            class="demo-button"
+                            onclick="demoGroupedLogging()"
+                        >
+                            Run Grouped Logging
+                        </button>
+                        <div class="code-block">
+                            console.group('User Actions') console.log('Login
+                            attempt') console.log('Data fetch')
+                            console.groupEnd()
+                        </div>
+                    </div>
+
+                    <div class="demo-card">
+                        <h4>Table Display</h4>
+                        <button
+                            class="demo-button"
+                            onclick="demoTableDisplay()"
+                        >
+                            Show Table
+                        </button>
+                        <div class="code-block">
+                            const users = [ { name: 'John', age: 30 }, { name:
+                            'Jane', age: 25 } ] console.table(users)
+                        </div>
+                    </div>
+
+                    <div class="demo-card">
+                        <h4>Performance Timing</h4>
+                        <button
+                            class="demo-button"
+                            onclick="demoPerformanceTiming()"
+                        >
+                            Time Performance
+                        </button>
+                        <div class="code-block">
+                            console.time('operation') // Some operation
+                            console.timeEnd('operation')
+                        </div>
+                    </div>
+
+                    <div class="demo-card">
+                        <h4>Assertions</h4>
+                        <button class="demo-button" onclick="demoAssertions()">
+                            Test Assertions
+                        </button>
+                        <div class="code-block">
+                            console.assert(5 > 3, '5 is greater than 3')
+                            console.assert(2 > 5, '2 is NOT greater than 5')
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive Debugging -->
+            <div class="section">
+                <h2>3. Interactive Console Debugging</h2>
+
+                <div class="demo-card">
+                    <h4>Calculator with Debug Output</h4>
+                    <p>
+                        Try different operations and watch the console for
+                        detailed debugging information:
+                    </p>
+
+                    <div class="form-group">
+                        <label>Number 1:</label>
+                        <input type="number" id="num1" value="10" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Operation:</label>
+                        <select id="operation">
+                            <option value="add">Add (+)</option>
+                            <option value="subtract">Subtract (-)</option>
+                            <option value="multiply">Multiply (×)</option>
+                            <option value="divide">Divide (÷)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Number 2:</label>
+                        <input type="number" id="num2" value="5" />
+                    </div>
+
+                    <button class="demo-button" onclick="performCalculation()">
+                        Calculate with Debug Output
+                    </button>
+
+                    <div id="result" class="status"></div>
+                </div>
+            </div>
+
+            <!-- Error Simulation -->
+            <div class="section">
+                <h2>4. Error Debugging Scenarios</h2>
+
+                <div class="demo-grid">
+                    <div class="demo-card">
+                        <h4>Reference Error</h4>
+                        <button
+                            class="demo-button"
+                            onclick="triggerReferenceError()"
+                        >
+                            Trigger Reference Error
+                        </button>
+                        <div class="code-block">
+                            // Accessing undefined variable
+                            console.log(undefinedVariable)
+                        </div>
+                    </div>
+
+                    <div class="demo-card">
+                        <h4>Type Error</h4>
+                        <button
+                            class="demo-button"
+                            onclick="triggerTypeError()"
+                        >
+                            Trigger Type Error
+                        </button>
+                        <div class="code-block">
+                            // Calling method on null/undefined const obj = null
+                            obj.someMethod()
+                        </div>
+                    </div>
+
+                    <div class="demo-card">
+                        <h4>Syntax Error</h4>
+                        <button
+                            class="demo-button"
+                            onclick="triggerSyntaxError()"
+                        >
+                            Trigger Syntax Error
+                        </button>
+                        <div class="code-block">
+                            // Invalid JSON parsing JSON.parse('{ invalid: json
+                            }')
+                        </div>
+                    </div>
+
+                    <div class="demo-card">
+                        <h4>Custom Error Handling</h4>
+                        <button
+                            class="demo-button"
+                            onclick="demoErrorHandling()"
+                        >
+                            Demo Error Handling
+                        </button>
+                        <div class="code-block">
+                            try { riskyOperation() } catch (error) {
+                            console.error('Caught:', error) }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stack Trace Analysis -->
+            <div class="section">
+                <h2>5. Stack Trace Analysis</h2>
+
+                <div class="demo-card">
+                    <h4>Function Call Chain Debugging</h4>
+                    <p>
+                        Click the button below and examine the stack trace in
+                        the console:
+                    </p>
+                    <button class="demo-button" onclick="startCallChain()">
+                        Generate Stack Trace
+                    </button>
+
+                    <div class="code-block">
+                        function levelOne() { console.trace('Call stack at level
+                        one') levelTwo() } function levelTwo() {
+                        console.trace('Call stack at level two') levelThree() }
+                        function levelThree() { console.trace('Call stack at
+                        level three') throw new Error('Intentional error for
+                        stack trace') }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Console API Exploration -->
+            <div class="section">
+                <h2>6. Console API Deep Dive</h2>
+
+                <div class="demo-grid">
+                    <div class="demo-card">
+                        <h4>Count and CountReset</h4>
+                        <button
+                            class="demo-button"
+                            onclick="demoCountMethods()"
+                        >
+                            Demo Count Methods
+                        </button>
+                        <div class="code-block">
+                            console.count('button clicks') console.count('button
+                            clicks') console.countReset('button clicks')
+                        </div>
+                    </div>
+
+                    <div class="demo-card">
+                        <h4>Clear Console</h4>
+                        <button
+                            class="demo-button"
+                            onclick="demoClearConsole()"
+                        >
+                            Clear Console
+                        </button>
+                        <div class="code-block">
+                            console.clear() // Clears all console output
+                        </div>
+                    </div>
+
+                    <div class="demo-card">
+                        <h4>Console Styling</h4>
+                        <button
+                            class="demo-button"
+                            onclick="demoConsoleStyling()"
+                        >
+                            Show Styled Output
+                        </button>
+                        <div class="code-block">
+                            console.log('%cStyled Text', 'color: red; font-size:
+                            20px;')
+                        </div>
+                    </div>
+
+                    <div class="demo-card">
+                        <h4>Memory Usage</h4>
+                        <button class="demo-button" onclick="demoMemoryUsage()">
+                            Check Memory
+                        </button>
+                        <div class="code-block">
+                            console.memory // Chrome only // Shows memory usage
+                            info
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Real-world Debugging Scenarios -->
+            <div class="section">
+                <h2>7. Real-world Debugging Scenarios</h2>
+
+                <div class="demo-card">
+                    <h4>API Request Debugging</h4>
+                    <p>Simulate an API request with comprehensive logging:</p>
+
+                    <div class="form-group">
+                        <label>API Endpoint:</label>
+                        <input
+                            type="text"
+                            id="apiUrl"
+                            value="https://jsonplaceholder.typicode.com/posts/1"
+                        />
+                    </div>
+
+                    <button class="demo-button" onclick="debugApiRequest()">
+                        Debug API Request
+                    </button>
+                    <button class="demo-button" onclick="debugFailedRequest()">
+                        Debug Failed Request
+                    </button>
+
+                    <div id="apiResult" class="status"></div>
+                </div>
+            </div>
+
+            <!-- Tips and Best Practices -->
+            <div class="section">
+                <h2>8. Console Debugging Best Practices</h2>
+
+                <div class="demo-grid">
+                    <div class="demo-card">
+                        <h4>🎯 Effective Logging Tips</h4>
+                        <ul style="margin-left: 20px; color: #555">
+                            <li>Use descriptive log messages</li>
+                            <li>Include context and variable values</li>
+                            <li>
+                                Use appropriate log levels (log, warn, error)
+                            </li>
+                            <li>Remove debug logs before production</li>
+                        </ul>
+                    </div>
+
+                    <div class="demo-card">
+                        <h4>🚀 Advanced Techniques</h4>
+                        <ul style="margin-left: 20px; color: #555">
+                            <li>Use console.trace() for call stacks</li>
+                            <li>Group related logs together</li>
+                            <li>Time performance-critical code</li>
+                            <li>Use conditional breakpoints</li>
+                        </ul>
+                    </div>
+
+                    <div class="demo-card">
+                        <h4>⚠️ Common Pitfalls</h4>
+                        <ul style="margin-left: 20px; color: #555">
+                            <li>Logging objects by reference</li>
+                            <li>Too many console.log statements</li>
+                            <li>Not checking different log levels</li>
+                            <li>Forgetting to remove debug code</li>
+                        </ul>
+                    </div>
+
+                    <div class="demo-card">
+                        <h4>🛠️ Console Commands</h4>
+                        <button
+                            class="demo-button"
+                            onclick="showConsoleCommands()"
+                        >
+                            Show Available Commands
+                        </button>
+                        <p
+                            style="
+                                margin-top: 10px;
+                                color: #666;
+                                font-size: 0.9rem;
+                            "
+                        >
+                            Click to see what commands you can type directly in
+                            the console!
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Initialize console with welcome message
+            console.group("🐛 Debug-Me: Console Tab Debugging Session Started");
+            console.log(
+                "%c🎉 Welcome to Console Debugging!",
+                "color: #667eea; font-size: 16px; font-weight: bold;"
+            );
+            console.log(
+                "%cOpen this console tab to see all debugging examples in action.",
+                "color: #764ba2;"
+            );
+            console.log(
+                "%cTip: You can also type commands directly in the console!",
+                "color: #28a745; font-style: italic;"
+            );
+            console.groupEnd();
+
+            // 1. Basic Console Methods
+            function demoBasicLogging() {
+                console.group("📝 Basic Console Logging Demo");
+
+                console.log("🔵 console.log() - General purpose logging");
+                console.info("ℹ️ console.info() - Informational messages");
+                console.warn("⚠️ console.warn() - Warning messages");
+                console.error("❌ console.error() - Error messages");
+
+                console.log("Multiple values:", "string", 42, true, {
+                    key: "value",
+                });
+                console.groupEnd();
+            }
+
+            function demoVariableInspection() {
+                console.group("🔍 Variable Inspection Demo");
+
+                const user = {
+                    id: 1,
+                    name: "John Doe",
+                    email: "john@example.com",
+                    preferences: {
+                        theme: "dark",
+                        notifications: true,
+                    },
+                };
+
+                const numbers = [1, 2, 3, 4, 5];
+
+                console.log("📊 Using console.log():");
+                console.log("User object:", user);
+                console.log("Numbers array:", numbers);
+
+                console.log(
+                    "\n📋 Using console.dir() for detailed object inspection:"
+                );
+                console.dir(user);
+
+                console.log("\n🏷️ Using console.table() for structured data:");
+                console.table(user);
+                console.table(numbers);
+
+                console.groupEnd();
+            }
+
+            // 2. Advanced Console Features
+            function demoGroupedLogging() {
+                console.group("📂 Grouped Logging Demo");
+
+                console.group("🔐 User Authentication");
+                console.log("✅ Validating credentials");
+                console.log("🔑 Generating JWT token");
+                console.log("💾 Storing session data");
+                console.groupEnd();
+
+                console.group("📡 API Operations");
+                console.log("📤 Sending request to /api/users");
+                console.log("📥 Received response: 200 OK");
+                console.groupCollapsed("📋 Response Details"); // Collapsed by default
+                console.log("Headers:", { "Content-Type": "application/json" });
+                console.log("Body:", { users: ["John", "Jane"] });
+                console.groupEnd();
+                console.groupEnd();
+
+                console.groupEnd();
+            }
+
+            function demoTableDisplay() {
+                console.group("📊 Table Display Demo");
+
+                const users = [
+                    { id: 1, name: "John Doe", age: 30, role: "Admin" },
+                    { id: 2, name: "Jane Smith", age: 25, role: "User" },
+                    { id: 3, name: "Bob Johnson", age: 35, role: "Moderator" },
+                ];
+
+                const performance = {
+                    "Page Load": "2.3s",
+                    "API Response": "450ms",
+                    "DOM Ready": "1.8s",
+                    "First Paint": "1.2s",
+                };
+
+                console.log("📋 Users table:");
+                console.table(users);
+
+                console.log("📋 Performance metrics:");
+                console.table(performance);
+
+                console.log("📋 Table with specific columns:");
+                console.table(users, ["name", "role"]);
+
+                console.groupEnd();
+            }
+
+            function demoPerformanceTiming() {
+                console.group("⏱️ Performance Timing Demo");
+
+                // Demo different timing scenarios
+                console.time("Fast Operation");
+                for (let i = 0; i < 1000; i++) {
+                    // Quick operation
+                    Math.sqrt(i);
+                }
+                console.timeEnd("Fast Operation");
+
+                console.time("Slow Operation");
+                setTimeout(() => {
+                    console.timeEnd("Slow Operation");
+                    console.log("✅ Async operation completed");
+                }, 1000);
+
+                console.time("DOM Operation");
+                const elements = document.querySelectorAll("*");
+                console.log(`📊 Found ${elements.length} DOM elements`);
+                console.timeEnd("DOM Operation");
+
+                console.groupEnd();
+            }
+
+            function demoAssertions() {
+                console.group("✅ Assertions Demo");
+
+                const user = { name: "John", age: 30 };
+                const numbers = [1, 2, 3, 4, 5];
+
+                console.assert(user.name === "John", "✅ User name is correct");
+                console.assert(user.age >= 18, "✅ User is an adult");
+                console.assert(
+                    numbers.length === 5,
+                    "✅ Array has correct length"
+                );
+
+                // These should fail and show in console
+                console.assert(user.age < 18, "❌ This assertion should fail");
+                console.assert(
+                    numbers.includes(10),
+                    "❌ Array should contain 10"
+                );
+
+                console.log(
+                    "💡 Check console for assertion results (failures will be highlighted in red)"
+                );
+                console.groupEnd();
+            }
+
+            // 3. Interactive Calculator
+            function performCalculation() {
+                console.group("🧮 Calculator Debug Session");
+
+                const num1 = parseFloat(document.getElementById("num1").value);
+                const num2 = parseFloat(document.getElementById("num2").value);
+                const operation = document.getElementById("operation").value;
+
+                console.log("📊 Input Parameters:");
+                console.log("  num1:", num1, typeof num1);
+                console.log("  num2:", num2, typeof num2);
+                console.log("  operation:", operation);
+
+                // Validation with debugging
+                if (isNaN(num1) || isNaN(num2)) {
+                    console.error("❌ Invalid input detected");
+                    console.log("  num1 valid:", !isNaN(num1));
+                    console.log("  num2 valid:", !isNaN(num2));
+                    showStatus("Please enter valid numbers!", "error");
+                    console.groupEnd();
+                    return;
+                }
+
+                console.log("✅ Input validation passed");
+
+                let result;
+                console.log("🔄 Performing operation...");
+
+                switch (operation) {
+                    case "add":
+                        result = num1 + num2;
+                        console.log(
+                            `➕ Addition: ${num1} + ${num2} = ${result}`
+                        );
+                        break;
+                    case "subtract":
+                        result = num1 - num2;
+                        console.log(
+                            `➖ Subtraction: ${num1} - ${num2} = ${result}`
+                        );
+                        break;
+                    case "multiply":
+                        result = num1 * num2;
+                        console.log(
+                            `✖️ Multiplication: ${num1} × ${num2} = ${result}`
+                        );
+                        break;
+                    case "divide":
+                        if (num2 === 0) {
+                            console.error("❌ Division by zero detected");
+                            console.warn("⚠️ Cannot divide by zero");
+                            showStatus("Cannot divide by zero!", "error");
+                            console.groupEnd();
+                            return;
+                        }
+                        result = num1 / num2;
+                        console.log(
+                            `➗ Division: ${num1} ÷ ${num2} = ${result}`
+                        );
+                        break;
+                    default:
+                        console.error("❌ Unknown operation:", operation);
+                        console.groupEnd();
+                        return;
+                }
+
+                console.log("📈 Result Summary:");
+                console.log("  Final result:", result);
+                console.log("  Result type:", typeof result);
+                console.log("  Is finite:", Number.isFinite(result));
+
+                showStatus(`Result: ${result}`, "success");
+                console.log("✅ Calculation completed successfully");
+                console.groupEnd();
+            }
+
+            // 4. Error Scenarios
+            function triggerReferenceError() {
+                console.group("🔴 Reference Error Demo");
+                console.log("About to trigger a ReferenceError...");
+
+                try {
+                    console.log(undefinedVariable); // This will throw ReferenceError
+                } catch (error) {
+                    console.error("Caught ReferenceError:", error.name);
+                    console.error("Message:", error.message);
+                    console.error("Stack trace:", error.stack);
+                }
+
+                console.groupEnd();
+            }
+
+            function triggerTypeError() {
+                console.group("🔴 Type Error Demo");
+                console.log("About to trigger a TypeError...");
+
+                try {
+                    const obj = null;
+                    console.log("Attempting to call method on null object...");
+                    obj.someMethod(); // This will throw TypeError
+                } catch (error) {
+                    console.error("Caught TypeError:", error.name);
+                    console.error("Message:", error.message);
+                    console.error("Stack trace:", error.stack);
+                }
+
+                console.groupEnd();
+            }
+
+            function triggerSyntaxError() {
+                console.group("🔴 Syntax Error Demo");
+                console.log("About to trigger a SyntaxError...");
+
+                try {
+                    const invalidJson = "{ invalid: json }";
+                    console.log(
+                        "Attempting to parse invalid JSON:",
+                        invalidJson
+                    );
+                    JSON.parse(invalidJson); // This will throw SyntaxError
+                } catch (error) {
+                    console.error("Caught SyntaxError:", error.name);
+                    console.error("Message:", error.message);
+                    console.error("Invalid JSON string caused the error");
+                }
+
+                console.groupEnd();
+            }
+
+            function demoErrorHandling() {
+                console.group("🛡️ Error Handling Best Practices");
+
+                function riskyOperation(shouldFail = false) {
+                    console.log("🎲 Executing risky operation...");
+
+                    if (shouldFail || Math.random() < 0.5) {
+                        throw new Error("Random failure occurred");
+                    }
+
+                    return "Operation successful!";
+                }
+
+                // Demonstrate proper error handling
+                try {
+                    console.log("🔄 Attempt 1:");
+                    const result1 = riskyOperation();
+                    console.log("✅ Success:", result1);
+                } catch (error) {
+                    console.warn("⚠️ Operation failed, retrying...");
+                    console.log("Error details:", error.message);
+                }
+
+                try {
+                    console.log("🔄 Attempt 2 (forced success):");
+                    const result2 = riskyOperation(false);
+                    console.log("✅ Success:", result2);
+                } catch (error) {
+                    console.error("❌ Both attempts failed:", error.message);
+                }
+
+                console.groupEnd();
+            }
+
+            // 5. Stack Trace Analysis
+            function startCallChain() {
+                console.group("📚 Stack Trace Analysis");
+                console.log("🚀 Starting function call chain...");
+
+                try {
+                    levelOne();
+                } catch (error) {
+                    console.error("🔍 Final error caught:", error.message);
+                    console.log("📋 Full stack trace:");
+                    console.error(error.stack);
+                }
+
+                console.groupEnd();
+            }
+
+            function levelOne() {
+                console.log("1️⃣ Entering levelOne()");
+                console.trace("Call stack at levelOne");
+                levelTwo();
+            }
+
+            function levelTwo() {
+                console.log("2️⃣ Entering levelTwo()");
+                console.trace("Call stack at levelTwo");
+                levelThree();
+            }
+
+            function levelThree() {
+                console.log("3️⃣ Entering levelThree()");
+                console.trace("Call stack at levelThree");
+                console.log("💥 About to throw error...");
+                throw new Error(
+                    "Intentional error for stack trace demonstration"
+                );
+            }
+
+            // 6. Console API Deep Dive
+            let clickCount = 0;
+            function demoCountMethods() {
+                console.group("🔢 Count Methods Demo");
+
+                clickCount++;
+                console.count("Button Clicks");
+                console.count("Button Clicks");
+                console.count("Button Clicks");
+
+                console.count("Different Counter");
+                console.count("Different Counter");
+
+                console.log("📊 Resetting Button Clicks counter...");
+                console.countReset("Button Clicks");
+                console.count("Button Clicks"); // Should start from 1 again
+
+                console.groupEnd();
+            }
+
+            function demoClearConsole() {
+                console.log("🧹 About to clear console in 2 seconds...");
+                console.log(
+                    "💡 Notice: This will clear all previous console output"
+                );
+
+                setTimeout(() => {
+                    console.clear();
+                    console.log(
+                        "✨ Console cleared! Previous messages are gone."
+                    );
+                    console.log(
+                        "🔄 You can continue with fresh console output."
+                    );
+                }, 2000);
+            }
+
+            function demoConsoleStyling() {
+                console.group("🎨 Console Styling Demo");
+
+                console.log(
+                    "%c🌈 Welcome to Styled Console Output!",
+                    "color: #667eea; font-size: 20px; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);"
+                );
+
+                console.log(
+                    "%cSuccess Message",
+                    "background: #d4edda; color: #155724; padding: 5px 10px; border-radius: 3px; font-weight: bold;"
+                );
+
+                console.log(
+                    "%cWarning Message",
+                    "background: #fff3cd; color: #856404; padding: 5px 10px; border-radius: 3px; font-weight: bold;"
+                );
+
+                console.log(
+                    "%cError Message",
+                    "background: #f8d7da; color: #721c24; padding: 5px 10px; border-radius: 3px; font-weight: bold;"
+                );
+
+                console.log(
+                    "%cMultiple %cStyles %cIn One %cMessage!",
+                    "color: red; font-weight: bold;",
+                    "color: blue; font-style: italic;",
+                    "color: green; text-decoration: underline;",
+                    "color: purple; font-size: 18px;"
+                );
+
+                console.log(
+                    "💡 Tip: Use %c to add CSS styling to console messages"
+                );
+                console.groupEnd();
+            }
+
+            function demoMemoryUsage() {
+                console.group("💾 Memory Usage Demo");
+
+                if (console.memory) {
+                    console.log("📊 Current Memory Usage:");
+                    console.log(
+                        "  Used JS Heap Size:",
+                        (console.memory.usedJSHeapSize / 1024 / 1024).toFixed(
+                            2
+                        ) + " MB"
+                    );
+                    console.log(
+                        "  Total JS Heap Size:",
+                        (console.memory.totalJSHeapSize / 1024 / 1024).toFixed(
+                            2
+                        ) + " MB"
+                    );
+                    console.log(
+                        "  JS Heap Size Limit:",
+                        (console.memory.jsHeapSizeLimit / 1024 / 1024).toFixed(
+                            2
+                        ) + " MB"
+                    );
+
+                    console.table({
+                        "Used (MB)": (
+                            console.memory.usedJSHeapSize /
+                            1024 /
+                            1024
+                        ).toFixed(2),
+                        "Total (MB)": (
+                            console.memory.totalJSHeapSize /
+                            1024 /
+                            1024
+                        ).toFixed(2),
+                        "Limit (MB)": (
+                            console.memory.jsHeapSizeLimit /
+                            1024 /
+                            1024
+                        ).toFixed(2),
+                    });
+                } else {
+                    console.warn(
+                        "⚠️ console.memory is not available in this browser"
+                    );
+                    console.log(
+                        "💡 This feature is available in Chrome-based browsers"
+                    );
+                }
+
+                console.groupEnd();
+            }
+
+            // 7. Real-world API Debugging
+            async function debugApiRequest() {
+                const url = document.getElementById("apiUrl").value;
+
+                console.group("🌐 API Request Debugging");
+                console.time("API Request Duration");
+
+                console.log("📡 Starting API request...");
+                console.log("🎯 Target URL:", url);
+                console.log("⏰ Timestamp:", new Date().toISOString());
+
+                try {
+                    console.log("📤 Sending fetch request...");
+
+                    const response = await fetch(url);
+
+                    console.log("📥 Response received!");
+                    console.log("📊 Response details:");
+                    console.log("  Status:", response.status);
+                    console.log("  Status Text:", response.statusText);
+                    console.log("  OK:", response.ok);
+                    console.log("  URL:", response.url);
+
+                    console.log("📋 Response headers:");
+                    for (const [key, value] of response.headers) {
+                        console.log(`  ${key}: ${value}`);
+                    }
+
+                    const data = await response.json();
+                    console.log("📄 Response data:");
+                    console.log(data);
+                    console.table(data);
+
+                    console.timeEnd("API Request Duration");
+                    showStatus(
+                        `✅ API request successful! Check console for details.`,
+                        "success"
+                    );
+                } catch (error) {
+                    console.error("❌ API request failed:", error.message);
+                    console.error("🔍 Error details:", error);
+                    console.timeEnd("API Request Duration");
+                    showStatus(
+                        `❌ API request failed: ${error.message}`,
+                        "error"
+                    );
+                }
+
+                console.groupEnd();
+            }
+
+            async function debugFailedRequest() {
+                console.group("🔴 Failed API Request Debugging");
+
+                const badUrl = "https://invalid-url-that-will-fail.fake";
+
+                console.log("🎯 Intentionally using invalid URL:", badUrl);
+                console.time("Failed Request Duration");
+
+                try {
+                    console.log("📤 Attempting request to invalid URL...");
+                    const response = await fetch(badUrl);
+                    console.log("📥 Unexpected success:", response);
+                } catch (error) {
+                    console.error("❌ Expected error occurred:", error.name);
+                    console.error("📝 Error message:", error.message);
+                    console.error("🔍 Full error object:", error);
+
+                    // Debug error properties
+                    console.log("🔧 Debugging error properties:");
+                    console.log("  error.name:", error.name);
+                    console.log("  error.message:", error.message);
+                    console.log("  error.stack:", error.stack);
+
+                    console.timeEnd("Failed Request Duration");
+                    showStatus(
+                        "✅ Error handling demonstration completed!",
+                        "info"
+                    );
+                }
+
+                console.groupEnd();
+            }
+
+            // Console Commands Demo
+            function showConsoleCommands() {
+                console.group("💻 Available Console Commands");
+
+                console.log(
+                    "🎯 Try typing these commands directly in the console:"
+                );
+                console.log("");
+
+                const commands = [
+                    {
+                        cmd: "$0",
+                        desc: "References the currently selected element in Elements tab",
+                    },
+                    {
+                        cmd: "$1, $2, $3, $4",
+                        desc: "References previously selected elements",
+                    },
+                    {
+                        cmd: '$("selector")',
+                        desc: "Equivalent to document.querySelectorAll()",
+                    },
+                    {
+                        cmd: '$("selector")',
+                        desc: "Equivalent to document.querySelector()",
+                    },
+                    {
+                        cmd: "dir(object)",
+                        desc: "Lists object properties (same as console.dir)",
+                    },
+                    { cmd: "copy(value)", desc: "Copies value to clipboard" },
+                    {
+                        cmd: "inspect(element)",
+                        desc: "Inspects element in Elements tab",
+                    },
+                    {
+                        cmd: "keys(object)",
+                        desc: "Returns array of object keys",
+                    },
+                    {
+                        cmd: "values(object)",
+                        desc: "Returns array of object values",
+                    },
+                    {
+                        cmd: "monitor(function)",
+                        desc: "Logs when function is called",
+                    },
+                    {
+                        cmd: "unmonitor(function)",
+                        desc: "Stops monitoring function",
+                    },
+                    { cmd: "clear()", desc: "Clears the console" },
+                ];
+
+                console.table(commands);
+
+                console.log("💡 Example usage:");
+                console.log(
+                    '  Try: $("button") // Gets all buttons on the page'
+                );
+                console.log(
+                    "  Try: copy(document.title) // Copies page title to clipboard"
+                );
+                console.log(
+                    "  Try: keys(window) // Shows all window properties"
+                );
+
+                // Demonstrate some commands
+                console.log("");
+                console.log("🔍 Live demonstration:");
+                console.log("All buttons on this page:", $("button"));
+                console.log("All demo cards:", $(".demo-card"));
+                console.log("Page title:", document.title);
+
+                console.groupEnd();
+            }
+
+            // Utility Functions
+            function showStatus(message, type) {
+                const statusEl =
+                    document.getElementById("result") ||
+                    document.getElementById("apiResult");
+                if (statusEl) {
+                    statusEl.textContent = message;
+                    statusEl.className = `status ${type}`;
+                    statusEl.style.display = "block";
+
+                    // Auto hide after 5 seconds
+                    setTimeout(() => {
+                        statusEl.style.display = "none";
+                    }, 5000);
+                }
+            }
+
+            // Advanced Debugging Techniques
+            function demoAdvancedTechniques() {
+                console.group("🚀 Advanced Debugging Techniques");
+
+                // Conditional logging
+                const DEBUG_MODE = true;
+                const debugLog = (...args) => {
+                    if (DEBUG_MODE) {
+                        console.log("🐛 [DEBUG]", ...args);
+                    }
+                };
+
+                debugLog("This only shows when DEBUG_MODE is true");
+
+                // Object destructuring in console
+                const user = { name: "John", age: 30, city: "New York" };
+                console.log("📦 Object destructuring shorthand:");
+                console.log({ user }); // Shows variable name and value
+
+                // Console with emojis for better visibility
+                console.log("🟢 Success operation");
+                console.log("🟡 Warning operation");
+                console.log("🔴 Error operation");
+                console.log("🔵 Info operation");
+
+                // Performance mark and measure
+                performance.mark("start-operation");
+
+                // Simulate some work
+                for (let i = 0; i < 1000000; i++) {
+                    Math.random();
+                }
+
+                performance.mark("end-operation");
+                performance.measure(
+                    "operation-duration",
+                    "start-operation",
+                    "end-operation"
+                );
+
+                const measures = performance.getEntriesByType("measure");
+                console.log("📊 Performance measurements:", measures);
+
+                console.groupEnd();
+            }
+
+            // Initialize page with helpful console messages
+            function initializeConsoleHelp() {
+                console.log("");
+                console.log(
+                    "%c🎓 Console Debugging Learning Path:",
+                    "color: #667eea; font-size: 18px; font-weight: bold;"
+                );
+                console.log("1️⃣ Start with Basic Console Methods");
+                console.log(
+                    "2️⃣ Explore Advanced Features (grouping, tables, timing)"
+                );
+                console.log("3️⃣ Practice with Interactive Examples");
+                console.log("4️⃣ Learn Error Debugging Patterns");
+                console.log("5️⃣ Analyze Stack Traces");
+                console.log("6️⃣ Master Console API Commands");
+                console.log("");
+                console.log(
+                    "%c💡 Pro Tips:",
+                    "color: #28a745; font-weight: bold;"
+                );
+                console.log(
+                    "• Right-click on console messages for additional options"
+                );
+                console.log("• Use Ctrl+L (Cmd+K on Mac) to clear console");
+                console.log(
+                    "• Filter messages by type using the console toolbar"
+                );
+                console.log("• Copy console output with right-click → Copy");
+                console.log("");
+
+                // Run advanced demo automatically
+                setTimeout(demoAdvancedTechniques, 1000);
+            }
+
+            // Page Load Event Listeners
+            document.addEventListener("DOMContentLoaded", function () {
+                console.log("🎉 Page loaded! Console debugging session ready.");
+                initializeConsoleHelp();
+
+                // Add keyboard shortcuts info
+                console.group("⌨️ Useful Keyboard Shortcuts");
+                console.log("F12 or Ctrl/Cmd+Shift+I: Open DevTools");
+                console.log("Ctrl/Cmd+Shift+J: Open Console directly");
+                console.log("Ctrl/Cmd+L: Clear console");
+                console.log("Ctrl/Cmd+Shift+C: Inspect element");
+                console.log("Esc: Toggle console drawer in other tabs");
+                console.groupEnd();
+            });
+
+            // Global error handling for demonstration
+            window.addEventListener("error", function (e) {
+                console.group("🚨 Global Error Caught");
+                console.error("Error:", e.error);
+                console.error("Message:", e.message);
+                console.error("Filename:", e.filename);
+                console.error("Line:", e.lineno);
+                console.error("Column:", e.colno);
+                console.groupEnd();
+            });
+
+            window.addEventListener("unhandledrejection", function (e) {
+                console.group("🚨 Unhandled Promise Rejection");
+                console.error("Reason:", e.reason);
+                console.error("Promise:", e.promise);
+                console.groupEnd();
+            });
+
+            // Additional utility functions for console exploration
+            function exploreConsoleObject() {
+                console.group("🔍 Exploring the Console Object");
+
+                console.log("📋 Available console methods:");
+                const consoleMethods = Object.getOwnPropertyNames(
+                    console
+                ).filter((prop) => typeof console[prop] === "function");
+                console.table(
+                    consoleMethods.map((method) => ({ Method: method }))
+                );
+
+                console.log("🎯 Console object details:");
+                console.dir(console);
+
+                console.groupEnd();
+            }
+
+            // Performance debugging helper
+            function demoPerformanceDebugging() {
+                console.group("⚡ Performance Debugging");
+
+                console.time("Heavy Computation");
+                console.profile("Heavy Computation Profile");
+
+                // Simulate heavy computation
+                const startTime = performance.now();
+
+                let result = 0;
+                for (let i = 0; i < 1000000; i++) {
+                    result += Math.sqrt(i) * Math.random();
+                }
+
+                const endTime = performance.now();
+
+                console.timeEnd("Heavy Computation");
+                console.profileEnd("Heavy Computation Profile");
+
+                console.log("📊 Performance metrics:");
+                console.log(
+                    "  Duration:",
+                    (endTime - startTime).toFixed(2),
+                    "milliseconds"
+                );
+                console.log(
+                    "  Operations per second:",
+                    ((1000000 / (endTime - startTime)) * 1000).toFixed(0)
+                );
+                console.log("  Result:", result.toExponential(2));
+
+                console.groupEnd();
+            }
+
+            // DOM debugging helper
+            function demoDOMDebugging() {
+                console.group("🏗️ DOM Debugging Techniques");
+
+                console.log("📊 Page statistics:");
+                console.log(
+                    "  Total elements:",
+                    document.querySelectorAll("*").length
+                );
+                console.log(
+                    "  Buttons:",
+                    document.querySelectorAll("button").length
+                );
+                console.log(
+                    "  Inputs:",
+                    document.querySelectorAll("input").length
+                );
+                console.log("  Divs:", document.querySelectorAll("div").length);
+
+                console.log("🎯 Current page info:");
+                console.log("  URL:", window.location.href);
+                console.log("  Title:", document.title);
+                console.log("  Domain:", window.location.hostname);
+                console.log("  User Agent:", navigator.userAgent);
+
+                console.log("📱 Viewport info:");
+                console.log("  Window width:", window.innerWidth);
+                console.log("  Window height:", window.innerHeight);
+                console.log("  Device pixel ratio:", window.devicePixelRatio);
+
+                console.groupEnd();
+            }
+
+            // Automatically run DOM debugging on page load
+            window.addEventListener("load", function () {
+                setTimeout(() => {
+                    exploreConsoleObject();
+                    demoDOMDebugging();
+                    demoPerformanceDebugging();
+                }, 2000);
+            });
+
+            // Global functions for manual testing in console
+            window.debugHelpers = {
+                logAllVariables: function () {
+                    console.group("📋 All Global Variables");
+                    for (let prop in window) {
+                        if (
+                            window.hasOwnProperty(prop) &&
+                            typeof window[prop] !== "function"
+                        ) {
+                            console.log(prop + ":", window[prop]);
+                        }
+                    }
+                    console.groupEnd();
+                },
+
+                findLargeObjects: function () {
+                    console.group("🔍 Large Objects Detection");
+                    console.log(
+                        "💡 This is a simplified demonstration - use Memory tab for real analysis"
+                    );
+
+                    const elements = document.querySelectorAll("*");
+                    console.log("DOM elements count:", elements.length);
+
+                    const scripts = document.querySelectorAll("script");
+                    console.log("Script tags:", scripts.length);
+
+                    console.groupEnd();
+                },
+
+                simulateMemoryLeak: function () {
+                    console.group("⚠️ Memory Leak Simulation");
+                    console.log(
+                        "🔬 Creating intentional memory leak for debugging practice..."
+                    );
+
+                    const leakyArray = [];
+                    const interval = setInterval(() => {
+                        leakyArray.push(new Array(1000).fill("leak"));
+                        console.log(
+                            "💧 Leak size:",
+                            leakyArray.length * 1000,
+                            "items"
+                        );
+
+                        if (leakyArray.length > 100) {
+                            clearInterval(interval);
+                            console.log("🛑 Stopping leak simulation");
+                            console.log("🧹 Cleaning up...");
+                            leakyArray.length = 0; // Clean up
+                        }
+                    }, 100);
+
+                    console.log(
+                        "💡 Watch memory usage in Performance/Memory tab"
+                    );
+                    console.groupEnd();
+                },
+            };
+
+            console.log("");
+            console.log(
+                "%c🛠️ Debug Helpers Available:",
+                "color: #28a745; font-weight: bold;"
+            );
+            console.log("Try these commands in console:");
+            console.log(
+                "• debugHelpers.logAllVariables() - List all global variables"
+            );
+            console.log(
+                "• debugHelpers.findLargeObjects() - Find large objects"
+            );
+            console.log(
+                "• debugHelpers.simulateMemoryLeak() - Simulate memory leak"
+            );
+        </script>
+    </body>
+</html>

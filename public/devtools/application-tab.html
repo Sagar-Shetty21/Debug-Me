@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>DevTools — Application Tab (Demo)</title>
+        <!-- Simple manifest for demo; in a real project serve /manifest.json -->
+        <link rel="manifest" href="/manifest.json" />
+        <style>
+            :root {
+                --bg: #0f1724;
+                --card: #0b1220;
+                --muted: #9aa4b2;
+                --accent: #7dd3fc;
+            }
+            html,
+            body {
+                height: 100%;
+                margin: 0;
+                font-family: Inter, ui-sans-serif, system-ui, -apple-system,
+                    "Segoe UI", Roboto, "Helvetica Neue", Arial;
+            }
+            body {
+                background: linear-gradient(180deg, #071024 0%, #081223 100%);
+                color: #e6eef6;
+                padding: 24px;
+            }
+            h1 {
+                font-size: 20px;
+                margin: 0 0 12px;
+            }
+            .grid {
+                display: grid;
+                grid-template-columns: 1fr 420px;
+                gap: 18px;
+            }
+            .card {
+                background: linear-gradient(
+                    180deg,
+                    rgba(255, 255, 255, 0.02),
+                    rgba(255, 255, 255, 0.01)
+                );
+                border: 1px solid rgba(255, 255, 255, 0.03);
+                padding: 16px;
+                border-radius: 12px;
+            }
+            button {
+                background: transparent;
+                border: 1px solid rgba(255, 255, 255, 0.06);
+                padding: 8px 10px;
+                border-radius: 8px;
+                color: inherit;
+                cursor: pointer;
+            }
+            pre {
+                background: #071826;
+                padding: 12px;
+                border-radius: 8px;
+                overflow: auto;
+            }
+            .row {
+                display: flex;
+                gap: 8px;
+                align-items: center;
+            }
+            label {
+                font-size: 13px;
+                color: var(--muted);
+            }
+            .small {
+                font-size: 13px;
+                color: var(--muted);
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Application Tab — Interactive Demo</h1>
+        <p class="small">
+            This page demonstrates common Application tab features in browser
+            DevTools: Storage (LocalStorage / SessionStorage / Cookies /
+            IndexedDB), Cache Storage & Service Workers, and the Web App
+            Manifest. Use the controls to generate sample data and then inspect
+            it in DevTools &mdash; <em>Application</em> panel.
+        </p>
+
+        <div class="grid" role="main">
+            <div>
+                <section class="card">
+                    <h2>Storage: LocalStorage & SessionStorage</h2>
+                    <div class="row" style="margin-bottom: 8px">
+                        <button id="ls-set">Set LocalStorage Sample</button>
+                        <button id="ls-get">Read LocalStorage</button>
+                        <button id="ls-clear">Clear LocalStorage</button>
+                    </div>
+                    <div class="row" style="margin-bottom: 12px">
+                        <button id="ss-set">Set SessionStorage Sample</button>
+                        <button id="ss-get">Read SessionStorage</button>
+                        <button id="ss-clear">Clear SessionStorage</button>
+                    </div>
+                    <pre id="ls-output" aria-live="polite">
+Local/Session output will appear here...</pre
+                    >
+                </section>
+
+                <section class="card" style="margin-top: 14px">
+                    <h2>Cookies</h2>
+                    <div class="row" style="margin-bottom: 8px">
+                        <button id="cookie-set">Set Cookie (1 day)</button>
+                        <button id="cookie-get">Read Cookies</button>
+                        <button id="cookie-clear">Clear Demo Cookie</button>
+                    </div>
+                    <pre id="cookie-output">Cookies output...</pre>
+                    <p class="small">
+                        Tip: open DevTools &gt; Application &gt; Cookies to
+                        inspect and edit cookies (path, expiry, HTTPOnly flags).
+                    </p>
+                </section>
+
+                <section class="card" style="margin-top: 14px">
+                    <h2>IndexedDB (simple demo)</h2>
+                    <div class="row" style="margin-bottom: 8px">
+                        <button id="idb-add">Add Item</button>
+                        <button id="idb-list">List Items</button>
+                        <button id="idb-clear">Clear DB</button>
+                    </div>
+                    <pre id="idb-output">IndexedDB output...</pre>
+                    <p class="small">
+                        Tip: use DevTools &gt; Application &gt; IndexedDB to
+                        view object stores and records.
+                    </p>
+                </section>
+
+                <section class="card" style="margin-top: 14px">
+                    <h2>Cache Storage & Service Worker</h2>
+                    <div class="row" style="margin-bottom: 8px">
+                        <button id="register-sw">
+                            Register Service Worker
+                        </button>
+                        <button id="unregister-sw">
+                            Unregister Service Worker
+                        </button>
+                        <button id="cache-add">
+                            Add /assets/example.txt to Cache
+                        </button>
+                        <button id="cache-list">List Cache Keys</button>
+                    </div>
+                    <pre id="sw-output">Service worker output...</pre>
+                    <p class="small">
+                        Tip: DevTools &gt; Application &gt; Service Workers
+                        shows registrations, scope and lifecycle controls.
+                    </p>
+                </section>
+            </div>
+
+            <aside>
+                <div class="card">
+                    <h3>Quick Inspector Cheatsheet</h3>
+                    <ul class="small">
+                        <li>
+                            <strong>Local Storage:</strong> DevTools &gt;
+                            Application &gt; Local Storage
+                        </li>
+                        <li>
+                            <strong>Session Storage:</strong> DevTools &gt;
+                            Application &gt; Session Storage
+                        </li>
+                        <li>
+                            <strong>IndexedDB:</strong> View object stores &
+                            records; Export as .json
+                        </li>
+                        <li>
+                            <strong>Cache Storage:</strong> Shows named cache
+                            entries used by the site
+                        </li>
+                        <li>
+                            <strong>Service Workers:</strong>
+                            Update/Unregister/Bypass for network
+                        </li>
+                        <li>
+                            <strong>Manifest:</strong> Shows icon set, scope,
+                            display & start_url
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="card" style="margin-top: 12px">
+                    <h3>Manifest Example</h3>
+                    <p class="small">
+                        This page links to <code>/manifest.json</code>. Open
+                        Application &gt; Manifest to inspect. Example manifest:
+                    </p>
+                    <pre>
+{
+  "name": "Debug-Me App",
+  "short_name": "DebugMe",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#071826",
+  "icons": [{"src":"/icons/192.png","sizes":"192x192","type":"image/png"}]
+}</pre
+                    >
+                </div>
+
+                <div class="card" style="margin-top: 12px">
+                    <h3>Useful Notes</h3>
+                    <ol class="small">
+                        <li>
+                            Use "Clear site data" in DevTools to drop everything
+                            quickly (Application &gt; Clear storage).
+                        </li>
+                        <li>
+                            When debugging SW, enable "Bypass for network" to
+                            test network-only behavior.
+                        </li>
+                        <li>
+                            IndexedDB changes may require a page refresh to
+                            appear in the UI.
+                        </li>
+                    </ol>
+                </div>
+            </aside>
+        </div>
+
+        <script>
+            // ---------------------- Local & Session Storage ----------------------
+            document.getElementById("ls-set").addEventListener("click", () => {
+                localStorage.setItem(
+                    "demo:user",
+                    JSON.stringify({
+                        id: 123,
+                        name: "Sagar",
+                        lastSeen: new Date().toISOString(),
+                    })
+                );
+                document.getElementById("ls-output").textContent =
+                    "LocalStorage demo:user set.";
+            });
+            document.getElementById("ls-get").addEventListener("click", () => {
+                const v = localStorage.getItem("demo:user") || "null";
+                document.getElementById("ls-output").textContent = v;
+            });
+            document
+                .getElementById("ls-clear")
+                .addEventListener("click", () => {
+                    localStorage.removeItem("demo:user");
+                    document.getElementById("ls-output").textContent =
+                        "LocalStorage demo:user removed.";
+                });
+
+            document.getElementById("ss-set").addEventListener("click", () => {
+                sessionStorage.setItem(
+                    "demo:sessionId",
+                    Math.random().toString(36).slice(2, 9)
+                );
+                document.getElementById("ls-output").textContent =
+                    "SessionStorage demo:sessionId set.";
+            });
+            document.getElementById("ss-get").addEventListener("click", () => {
+                document.getElementById("ls-output").textContent =
+                    sessionStorage.getItem("demo:sessionId") || "null";
+            });
+            document
+                .getElementById("ss-clear")
+                .addEventListener("click", () => {
+                    sessionStorage.removeItem("demo:sessionId");
+                    document.getElementById("ls-output").textContent =
+                        "SessionStorage cleared.";
+                });
+
+            // ---------------------- Cookies ----------------------
+            function setCookie(name, value, days) {
+                const d = new Date();
+                d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
+                document.cookie = `${name}=${encodeURIComponent(
+                    value
+                )};expires=${d.toUTCString()};path=/`;
+            }
+            function getCookies() {
+                return document.cookie;
+            }
+            function clearCookie(name) {
+                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+            }
+
+            document
+                .getElementById("cookie-set")
+                .addEventListener("click", () => {
+                    setCookie("demo_cookie", "hello-from-demo", 1);
+                    document.getElementById("cookie-output").textContent =
+                        "Set demo_cookie=hello-from-demo (1 day)";
+                });
+            document
+                .getElementById("cookie-get")
+                .addEventListener("click", () => {
+                    document.getElementById("cookie-output").textContent =
+                        getCookies() || "(no cookies)";
+                });
+            document
+                .getElementById("cookie-clear")
+                .addEventListener("click", () => {
+                    clearCookie("demo_cookie");
+                    document.getElementById("cookie-output").textContent =
+                        "demo_cookie cleared.";
+                });
+
+            // ---------------------- IndexedDB (vanilla, tiny wrapper) ----------------------
+            const IDB_NAME = "debugme-db";
+            const IDB_STORE = "notes";
+
+            function openDb() {
+                return new Promise((res, rej) => {
+                    const req = indexedDB.open(IDB_NAME, 1);
+                    req.onupgradeneeded = (e) => {
+                        const db = e.target.result;
+                        if (!db.objectStoreNames.contains(IDB_STORE))
+                            db.createObjectStore(IDB_STORE, {
+                                keyPath: "id",
+                                autoIncrement: true,
+                            });
+                    };
+                    req.onsuccess = (e) => res(e.target.result);
+                    req.onerror = (e) => rej(e.target.error);
+                });
+            }
+            async function idbAdd(item) {
+                const db = await openDb();
+                return new Promise((res, rej) => {
+                    const tx = db.transaction(IDB_STORE, "readwrite");
+                    tx
+                        .objectStore(IDB_STORE)
+                        .add({ text: item, created: Date.now() }).onsuccess =
+                        () => {
+                            res(true);
+                            db.close();
+                        };
+                    tx.onerror = (e) => {
+                        rej(e);
+                        db.close();
+                    };
+                });
+            }
+            async function idbList() {
+                const db = await openDb();
+                return new Promise((res, rej) => {
+                    const tx = db.transaction(IDB_STORE, "readonly");
+                    const req = tx.objectStore(IDB_STORE).getAll();
+                    req.onsuccess = () => {
+                        res(req.result);
+                        db.close();
+                    };
+                    req.onerror = (e) => {
+                        rej(e);
+                        db.close();
+                    };
+                });
+            }
+            async function idbClear() {
+                const db = await openDb();
+                return new Promise((res, rej) => {
+                    const tx = db.transaction(IDB_STORE, "readwrite");
+                    tx.objectStore(IDB_STORE).clear().onsuccess = () => {
+                        res(true);
+                        db.close();
+                    };
+                    tx.onerror = (e) => {
+                        rej(e);
+                        db.close();
+                    };
+                });
+            }
+
+            document
+                .getElementById("idb-add")
+                .addEventListener("click", async () => {
+                    try {
+                        await idbAdd(
+                            "Note at " + new Date().toLocaleTimeString()
+                        );
+                        document.getElementById("idb-output").textContent =
+                            "Added note to IndexedDB.";
+                    } catch (e) {
+                        document.getElementById("idb-output").textContent =
+                            "Error: " + e;
+                    }
+                });
+            document
+                .getElementById("idb-list")
+                .addEventListener("click", async () => {
+                    try {
+                        const all = await idbList();
+                        document.getElementById("idb-output").textContent =
+                            JSON.stringify(all, null, 2);
+                    } catch (e) {
+                        document.getElementById("idb-output").textContent =
+                            "Error: " + e;
+                    }
+                });
+            document
+                .getElementById("idb-clear")
+                .addEventListener("click", async () => {
+                    try {
+                        await idbClear();
+                        document.getElementById("idb-output").textContent =
+                            "IndexedDB cleared.";
+                    } catch (e) {
+                        document.getElementById("idb-output").textContent =
+                            "Error: " + e;
+                    }
+                });
+
+            // ---------------------- Cache Storage & Service Worker ----------------------
+            const swOutput = document.getElementById("sw-output");
+            document
+                .getElementById("register-sw")
+                .addEventListener("click", async () => {
+                    if ("serviceWorker" in navigator) {
+                        try {
+                            // register a basic inline service worker via blob for demo purposes
+                            const swCode = `self.addEventListener('install', e=>{self.skipWaiting()} );
+                          self.addEventListener('activate', e=>{self.clients.claim()} );
+                          self.addEventListener('fetch', e=>{ /* passthrough for demo */ });`;
+                            const blob = new Blob([swCode], {
+                                type: "application/javascript",
+                            });
+                            const url = URL.createObjectURL(blob);
+                            const reg = await navigator.serviceWorker.register(
+                                url
+                            );
+                            swOutput.textContent =
+                                "Service worker registered (blob). Scope: " +
+                                reg.scope;
+                        } catch (err) {
+                            swOutput.textContent = "SW register error: " + err;
+                        }
+                    } else
+                        swOutput.textContent =
+                            "Service workers not supported in this browser.";
+                });
+
+            document
+                .getElementById("unregister-sw")
+                .addEventListener("click", async () => {
+                    const regs =
+                        await navigator.serviceWorker.getRegistrations();
+                    let msg = "No registrations found.";
+                    for (const r of regs) {
+                        await r.unregister();
+                        msg = "Unregistered: " + r.scope;
+                    }
+                    swOutput.textContent = msg;
+                });
+
+            document
+                .getElementById("cache-add")
+                .addEventListener("click", async () => {
+                    if ("caches" in window) {
+                        try {
+                            const cache = await caches.open("debugme-cache-v1");
+                            // create a synthetic response since we may not have a real /assets/example.txt
+                            await cache.put(
+                                "/assets/example.txt",
+                                new Response("This is demo cached content")
+                            );
+                            swOutput.textContent =
+                                "Added /assets/example.txt to debugme-cache-v1";
+                        } catch (e) {
+                            swOutput.textContent = "Cache error: " + e;
+                        }
+                    } else
+                        swOutput.textContent = "Cache Storage not supported.";
+                });
+            document
+                .getElementById("cache-list")
+                .addEventListener("click", async () => {
+                    if ("caches" in window) {
+                        const keys = await caches.keys();
+                        swOutput.textContent = JSON.stringify(keys, null, 2);
+                    } else
+                        swOutput.textContent = "Cache Storage not supported.";
+                })(
+                // ---------------------- Helpful small utilities ----------------------
+                // Show initial quick state
+                function init() {
+                    document.getElementById("ls-output").textContent =
+                        "LocalStorage demo:user: " +
+                        (localStorage.getItem("demo:user") || "(not set)");
+                    document.getElementById("cookie-output").textContent =
+                        document.cookie || "(no cookies)";
+                    document.getElementById("idb-output").textContent =
+                        "IndexedDB ready. Use the buttons to add/list.";
+                    swOutput.textContent =
+                        "Service worker: " +
+                        (navigator.serviceWorker
+                            ? "supported"
+                            : "not supported");
+                }
+            )();
+
+            // ---------------------- End of script ----------------------
+        </script>
+    </body>
+</html>

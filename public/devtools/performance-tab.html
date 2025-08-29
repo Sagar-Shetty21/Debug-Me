@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>Debug‑Me — Performance Tab</title>
+        <style>
+            :root {
+                --bg: #0f1724;
+                --card: #0b1220;
+                --muted: #9aa4b2;
+                --accent: #7dd3fc;
+                --glass: rgba(255, 255, 255, 0.03);
+            }
+            html,
+            body {
+                height: 100%;
+                margin: 0;
+                font-family: Inter, ui-sans-serif, system-ui, -apple-system,
+                    "Segoe UI", Roboto, "Helvetica Neue", Arial;
+                background: linear-gradient(180deg, #071029 0%, #071827 100%);
+                color: #e6eef6;
+            }
+            .wrap {
+                max-width: 1100px;
+                margin: 32px auto;
+                padding: 24px;
+            }
+            header {
+                display: flex;
+                align-items: center;
+                gap: 18px;
+            }
+            header h1 {
+                margin: 0;
+                font-size: 20px;
+            }
+            .grid {
+                display: grid;
+                grid-template-columns: 1fr 360px;
+                gap: 18px;
+                margin-top: 18px;
+            }
+            .card {
+                background: var(--card);
+                padding: 16px;
+                border-radius: 12px;
+                box-shadow: 0 6px 18px rgba(2, 6, 23, 0.6);
+            }
+            .controls {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            button {
+                background: transparent;
+                border: 1px solid rgba(255, 255, 255, 0.06);
+                padding: 8px 12px;
+                border-radius: 8px;
+                color: var(--accent);
+                cursor: pointer;
+            }
+            button.primary {
+                background: linear-gradient(90deg, #0369a1, #0891b2);
+                border: none;
+                color: white;
+            }
+            pre {
+                background: var(--glass);
+                padding: 12px;
+                border-radius: 8px;
+                overflow: auto;
+                font-size: 13px;
+            }
+            h2 {
+                margin: 6px 0 12px 0;
+            }
+            .example {
+                margin-bottom: 14px;
+            }
+            label {
+                display: block;
+                font-size: 13px;
+                color: var(--muted);
+                margin-bottom: 6px;
+            }
+            .stat {
+                font-size: 14px;
+            }
+            .small {
+                font-size: 12px;
+                color: var(--muted);
+            }
+            .controls > button:active {
+                transform: translateY(1px);
+            }
+            .log {
+                height: 220px;
+                overflow: auto;
+                background: linear-gradient(
+                    180deg,
+                    rgba(255, 255, 255, 0.02),
+                    transparent
+                );
+                padding: 10px;
+                border-radius: 8px;
+            }
+            .row {
+                display: flex;
+                gap: 10px;
+                align-items: center;
+            }
+            footer {
+                margin-top: 18px;
+                color: var(--muted);
+                font-size: 13px;
+            }
+            .kbd {
+                background: #071827;
+                border: 1px solid rgba(255, 255, 255, 0.03);
+                padding: 4px 8px;
+                border-radius: 6px;
+                font-family: monospace;
+            }
+            .hint {
+                background: linear-gradient(
+                    90deg,
+                    rgba(125, 211, 252, 0.06),
+                    transparent
+                );
+                padding: 10px;
+                border-radius: 8px;
+                margin-top: 8px;
+            }
+            .canvas-box {
+                border-radius: 8px;
+                background: #05101a;
+                padding: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            a.link {
+                color: var(--accent);
+                text-decoration: none;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="wrap">
+            <header>
+                <svg
+                    width="40"
+                    height="40"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    aria-hidden
+                >
+                    <rect
+                        x="1"
+                        y="1"
+                        width="22"
+                        height="22"
+                        rx="6"
+                        stroke="url(#g)"
+                        stroke-width="1.2"
+                    />
+                    <defs>
+                        <linearGradient id="g" x1="0" x2="1">
+                            <stop offset="0" stop-color="#7dd3fc" />
+                            <stop offset="1" stop-color="#60a5fa" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <div>
+                    <h1>Performance Tab — Interactive Playground</h1>
+                    <div class="small">
+                        Exercises & instrumentation that map directly to the
+                        Browser DevTools → Performance panel
+                    </div>
+                </div>
+            </header>
+
+            <div class="grid">
+                <main class="card">
+                    <section class="example">
+                        <h2>Quick instructions</h2>
+                        <ol>
+                            <li>
+                                Open DevTools (F12 or
+                                <span class="kbd">Ctrl+Shift+I</span> /
+                                <span class="kbd">Cmd+Opt+I</span>) and go to
+                                the <strong>Performance</strong> panel.
+                            </li>
+                            <li>
+                                Use the controls on the right to start
+                                scenarios. Click <strong>Record</strong> in
+                                DevTools, run a scenario, then stop recording to
+                                inspect frames, main thread activity, and flame
+                                charts.
+                            </li>
+                            <li>
+                                Look for: long tasks, layout/reflow spikes,
+                                paint-heavy frames, and memory growth. Use
+                                <strong>Frames</strong>,
+                                <strong>Bottom-Up</strong>, and
+                                <strong>Event Log</strong>.
+                            </li>
+                        </ol>
+                        <div class="hint">
+                            Tip: this page uses
+                            <code>performance.mark</code> and
+                            <code>performance.measure</code> — those markers
+                            will show up in the DevTools timeline so you can
+                            align your code to the recorded trace.
+                        </div>
+                    </section>
+
+                    <section class="example">
+                        <h2>Interactive scenarios</h2>
+                        <div class="row" style="margin-bottom: 8px">
+                            <div style="flex: 1">
+                                <label
+                                    >Simulate CPU-bound work (long task)</label
+                                >
+                                <div class="controls">
+                                    <button id="cpuShort">
+                                        Small spike (150ms)
+                                    </button>
+                                    <button id="cpuLong">
+                                        Long spike (800ms)
+                                    </button>
+                                    <button id="cpuLoop">Start loop</button>
+                                    <button id="cpuStop">Stop loop</button>
+                                </div>
+                            </div>
+                            <div style="width: 320px">
+                                <label>Layout thrashing</label>
+                                <div class="controls">
+                                    <button id="thrash">
+                                        Trigger layout thrash
+                                    </button>
+                                    <button id="animToggle" class="primary">
+                                        Toggle large animation
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 12px" class="row">
+                            <div style="flex: 1">
+                                <label>Memory pressure</label>
+                                <div class="controls">
+                                    <button id="leak">Create leak</button>
+                                    <button id="free">Free memory</button>
+                                </div>
+                                <div class="small" style="margin-top: 6px">
+                                    After creating a leak, profile with the
+                                    Memory panel or take heap snapshots; look
+                                    for detached DOM nodes or retained arrays.
+                                </div>
+                            </div>
+
+                            <div style="width: 320px">
+                                <label>Paint-heavy canvas</label>
+                                <div class="controls">
+                                    <button id="startPaint">
+                                        Start painting
+                                    </button>
+                                    <button id="stopPaint">
+                                        Stop painting
+                                    </button>
+                                </div>
+                                <div class="small" style="margin-top: 6px">
+                                    Use the DevTools "Paint Flashing" tool to
+                                    see which areas repaint frequently.
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="example">
+                        <h2>API instrumentation</h2>
+                        <p class="small">
+                            Click the buttons below to add
+                            <code>performance.mark</code> and measurements —
+                            they appear as markers in the Performance panel
+                            timeline.
+                        </p>
+                        <div class="controls" style="margin-top: 8px">
+                            <button id="markStart">Mark start</button>
+                            <button id="markEnd">Mark end & measure</button>
+                            <button id="profile">
+                                Console profile (start/stop)
+                            </button>
+                        </div>
+                        <pre id="measures">
+/* measurements will appear here */</pre
+                        >
+                    </section>
+
+                    <section class="example">
+                        <h2>What to look for in DevTools</h2>
+                        <ul>
+                            <li>
+                                <strong>Long Tasks:</strong> any task >50ms —
+                                check the "Main" track and Event Log.
+                            </li>
+                            <li>
+                                <strong>Layout shifts:</strong> repeated
+                                style/layout calculations — check "Recalculate
+                                Style" and "Layout" slices.
+                            </li>
+                            <li>
+                                <strong>Paints:</strong> high paint cost,
+                                frequent paints — use "Paint flashing" and the
+                                "Paint" tracks.
+                            </li>
+                            <li>
+                                <strong>CPU hotspots:</strong> Inspect the
+                                bottom-up or call tree for expensive functions
+                                and inline scripts.
+                            </li>
+                            <li>
+                                <strong>Memory leaks:</strong> look for steadily
+                                growing heap between snapshots; detached DOM
+                                nodes are common leak sources.
+                            </li>
+                        </ul>
+                    </section>
+
+                    <section class="example">
+                        <h2>Built-in detectors</h2>
+                        <p class="small">
+                            This page listens for "longtask" using
+                            <code>PerformanceObserver</code>. When DevTools
+                            records a trace, you'll see entries for long tasks
+                            on the timeline and in the Event Log.
+                        </p>
+                        <div class="log" id="log"></div>
+                    </section>
+                </main>
+
+                <aside class="card">
+                    <h2>Controls & Diagnostics</h2>
+                    <div style="margin-top: 8px" class="small">
+                        Use these while recording in DevTools.
+                    </div>
+
+                    <div style="margin-top: 12px">
+                        <label>Shortcuts</label>
+                        <div class="small">
+                            Open DevTools: <span class="kbd">F12</span> or
+                            <span class="kbd">Ctrl+Shift+I</span> /
+                            <span class="kbd">Cmd+Opt+I</span>
+                        </div>
+                        <div class="small">
+                            Start/Stop Performance recording:
+                            <span class="kbd">Ctrl+E</span> (toggle)
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 12px">
+                        <label>Quick checklist</label>
+                        <ol class="small">
+                            <li>Record baseline (idle) for 5–10s.</li>
+                            <li>Record scenarios triggered on this page.</li>
+                            <li>
+                                Look at FPS, scripting, rendering, and painting
+                                breakdowns.
+                            </li>
+                            <li>
+                                Find functions with highest self time and inline
+                                optimizations.
+                            </li>
+                        </ol>
+                    </div>
+
+                    <div style="margin-top: 12px">
+                        <label>Markers</label>
+                        <div class="small">
+                            This page emits markers with
+                            <code>performance.mark</code>. They show up under
+                            the timeline's user timings section.
+                        </div>
+                        <div
+                            style="margin-top: 8px"
+                            id="markerList"
+                            class="small"
+                        ></div>
+                    </div>
+
+                    <div style="margin-top: 12px">
+                        <label>Canvas</label>
+                        <div class="canvas-box card" style="height: 150px">
+                            <canvas
+                                id="paintCanvas"
+                                width="300"
+                                height="110"
+                            ></canvas>
+                        </div>
+                    </div>
+
+                    <footer>
+                        This file is part of
+                        <strong>Debug‑Me</strong> Performance exercises. Use
+                        with Chrome/Edge for best DevTools experience.
+                    </footer>
+                </aside>
+            </div>
+        </div>
+
+        <script>
+            // Utility logging
+            const logEl = document.getElementById("log");
+            function log(msg) {
+                const t = new Date().toLocaleTimeString();
+                logEl.innerHTML = `<div>[${t}] ${msg}</div>` + logEl.innerHTML;
+            }
+
+            // PerformanceObserver for longtask
+            try {
+                const po = new PerformanceObserver((list) => {
+                    for (const entry of list.getEntries()) {
+                        if (entry.entryType === "longtask") {
+                            log(
+                                `LongTask: ${Math.round(entry.duration)}ms — ${
+                                    entry.name || "unknown"
+                                }`
+                            );
+                        }
+                    }
+                });
+                po.observe({ type: "longtask", buffered: true });
+            } catch (e) {
+                log(
+                    "PerformanceObserver longtask not supported in this browser"
+                );
+            }
+
+            // CPU-bound tasks
+            let cpuLoop = false;
+            document
+                .getElementById("cpuShort")
+                .addEventListener("click", () => {
+                    performance.mark("cpu-short-start");
+                    const end = Date.now() + 150;
+                    while (Date.now() < end) {
+                        Math.sqrt(Math.random() * 99999);
+                    }
+                    performance.mark("cpu-short-end");
+                    performance.measure(
+                        "cpu-short",
+                        "cpu-short-start",
+                        "cpu-short-end"
+                    );
+                    log("Ran small CPU spike (~150ms)");
+                    refreshMeasures();
+                });
+
+            document.getElementById("cpuLong").addEventListener("click", () => {
+                performance.mark("cpu-long-start");
+                const end = Date.now() + 800;
+                while (Date.now() < end) {
+                    Math.sqrt(Math.random() * 99999);
+                    JSON.stringify({ x: Math.random(), y: Math.random() });
+                }
+                performance.mark("cpu-long-end");
+                performance.measure(
+                    "cpu-long",
+                    "cpu-long-start",
+                    "cpu-long-end"
+                );
+                log("Ran long CPU spike (~800ms)");
+                refreshMeasures();
+            });
+
+            document.getElementById("cpuLoop").addEventListener("click", () => {
+                cpuLoop = true;
+                log("Started CPU loop (will keep the main thread busy)")(
+                    function loop() {
+                        if (!cpuLoop) return;
+                        const start = Date.now();
+                        while (Date.now() - start < 40) {
+                            Math.sin(Math.random() * 9999);
+                        }
+                        requestAnimationFrame(loop);
+                    }
+                )();
+            });
+            document.getElementById("cpuStop").addEventListener("click", () => {
+                cpuLoop = false;
+                log("Stopped CPU loop");
+            });
+
+            // Layout thrashing example
+            const animEl = document.createElement("div");
+            animEl.style.position = "absolute";
+            animEl.style.width = "40px";
+            animEl.style.height = "40px";
+            animEl.style.right = "24px";
+            animEl.style.top = "24px";
+            animEl.style.borderRadius = "8px";
+            animEl.style.background = "linear-gradient(90deg,#0369a1,#0891b2)";
+            document.body.appendChild(animEl);
+            let animOn = false;
+            document
+                .getElementById("animToggle")
+                .addEventListener("click", () => {
+                    animOn = !animOn;
+                    if (animOn) startAnim();
+                    else stopAnim();
+                });
+            let rafId;
+            function startAnim() {
+                let x = 0;
+                function frame() {
+                    x += 6;
+                    animEl.style.transform = `translateX(${x}px) scale(${
+                        1 + Math.abs(Math.sin(x / 30)) * 0.08
+                    })`;
+                    rafId = requestAnimationFrame(frame);
+                }
+                frame();
+                log(
+                    'Started large animation — inspect "Frames" and "Rendering" in Performance panel'
+                );
+            }
+            function stopAnim() {
+                cancelAnimationFrame(rafId);
+                log("Stopped animation");
+            }
+
+            // Layout thrash trigger: repeated read/write
+            document.getElementById("thrash").addEventListener("click", () => {
+                const box = document.createElement("div");
+                box.style.width = "200px";
+                box.style.height = "160px";
+                box.style.margin = "12px";
+                box.style.background =
+                    "linear-gradient(180deg,#04202b,#062238)";
+                box.style.borderRadius = "10px";
+                document.body.appendChild(box);
+                performance.mark("thrash-start");
+                // purposely alternate read/write to cause layout thrashing
+                for (let i = 0; i < 500; i++) {
+                    box.style.width = 200 + (i % 10) + "px"; // write
+                    const w = box.offsetWidth; // read -> forces layout
+                }
+                performance.mark("thrash-end");
+                performance.measure("thrash", "thrash-start", "thrash-end");
+                log("Triggered layout thrash (500 read/write operations)");
+                refreshMeasures();
+            });
+
+            // Memory leak example
+            const leakStore = [];
+            document.getElementById("leak").addEventListener("click", () => {
+                // create many objects and keep references
+                for (let i = 0; i < 20000; i++) {
+                    leakStore.push({
+                        i,
+                        data: new Array(200).fill("leak-" + i),
+                    });
+                }
+                log(`Created leak — leakStore length: ${leakStore.length}`);
+            });
+            document.getElementById("free").addEventListener("click", () => {
+                leakStore.length = 0;
+                log(
+                    "Cleared leakStore (set length=0). Take heap snapshot to verify."
+                );
+            });
+
+            // Paint heavy canvas
+            const canvas = document.getElementById("paintCanvas");
+            const ctx = canvas.getContext("2d");
+            let paintRunning = false;
+            let paintRaf;
+            function paintFrame() {
+                const w = canvas.width,
+                    h = canvas.height;
+                ctx.clearRect(0, 0, w, h);
+                const t = Date.now() / 50;
+                for (let i = 0; i < 50; i++) {
+                    ctx.beginPath();
+                    const x = Math.abs(Math.sin(t + i)) * w;
+                    const y = (i * 7) % h;
+                    ctx.arc(x, y, 6 + (i % 5), 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                if (paintRunning) paintRaf = requestAnimationFrame(paintFrame);
+            }
+            document
+                .getElementById("startPaint")
+                .addEventListener("click", () => {
+                    paintRunning = true;
+                    paintFrame();
+                    log("Started paint-heavy loop");
+                });
+            document
+                .getElementById("stopPaint")
+                .addEventListener("click", () => {
+                    paintRunning = false;
+                    cancelAnimationFrame(paintRaf);
+                    log("Stopped paint loop");
+                });
+
+            // Performance.mark and measure buttons
+            document
+                .getElementById("markStart")
+                .addEventListener("click", () => {
+                    performance.mark("user-start-" + Date.now());
+                    log(
+                        "Placed performance.mark — check the User Timing section in Performance panel"
+                    );
+                    refreshMarkers();
+                });
+            document.getElementById("markEnd").addEventListener("click", () => {
+                const start = "user-start-";
+                // find last mark we created
+                const marks = performance.getEntriesByType("mark");
+                if (marks.length === 0) {
+                    log('No marks found. Click "Mark start" first.');
+                    return;
+                }
+                const last = marks[marks.length - 1].name;
+                performance.mark("user-end-" + Date.now());
+                performance.measure(
+                    "user-measure-" + Date.now(),
+                    last,
+                    "user-end-" + Date.now()
+                );
+                log(`Measured from ${last} to user-end`);
+                refreshMeasures();
+                refreshMarkers();
+            });
+
+            document.getElementById("profile").addEventListener("click", () => {
+                // console.profile toggles may not be visible in all browsers; it's useful when devtools console is open
+                try {
+                    if (!window._profiling) {
+                        window._profiling = true;
+                        console.profile("manual-profile");
+                        log(
+                            "console.profile started — open Console to see profile"
+                        );
+                    } else {
+                        window._profiling = false;
+                        console.profileEnd("manual-profile");
+                        log("console.profile ended");
+                    }
+                } catch (e) {
+                    log("console.profile not supported in this environment");
+                }
+            });
+
+            function refreshMeasures() {
+                const ms = performance.getEntriesByType("measure");
+                const out = ms
+                    .map((m) => `${m.name}: ${m.duration.toFixed(1)}ms`)
+                    .join("\n");
+                document.getElementById("measures").textContent =
+                    out || "/* no measures yet */";
+            }
+            function refreshMarkers() {
+                const marks = performance.getEntriesByType("mark");
+                const listEl = document.getElementById("markerList");
+                listEl.innerHTML = marks
+                    .slice(-10)
+                    .map((m) => `${m.name} @ ${Math.round(m.startTime)}ms`)
+                    .join("<br/>");
+            }
+
+            // Initial refresh
+            refreshMeasures();
+            refreshMarkers();
+
+            // Export helper: snapshot user timings to console
+            window.exportTimings = function () {
+                console.table(performance.getEntriesByType("measure"));
+            };
+
+            // Small helpful notes in console
+            console.log(
+                "%cDebug‑Me Performance Tab loaded — open DevTools > Performance and record while interacting.",
+                "color:#7dd3fc"
+            );
+        </script>
+    </body>
+</html>

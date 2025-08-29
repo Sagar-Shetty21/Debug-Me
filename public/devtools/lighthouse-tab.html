@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Lighthouse Tab - Debug-Me</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 2rem;
+                background-color: #f9fafb;
+                color: #111827;
+            }
+            h1 {
+                color: #2563eb;
+            }
+            .card {
+                background: white;
+                padding: 1.5rem;
+                margin-bottom: 1rem;
+                border-radius: 8px;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            }
+            .score {
+                font-size: 1.5rem;
+                font-weight: bold;
+                margin: 0.5rem 0;
+            }
+            .good {
+                color: #16a34a;
+            }
+            .average {
+                color: #ca8a04;
+            }
+            .poor {
+                color: #dc2626;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>🚀 Lighthouse Tab Debugging</h1>
+        <p>
+            The <strong>Lighthouse Tab</strong> in Chrome DevTools is used to
+            audit your web app’s performance, accessibility, SEO, and best
+            practices. It generates a report with scores and recommendations.
+        </p>
+
+        <div class="card">
+            <h2>📊 Example Audit Results</h2>
+            <p class="score good">Performance: 92</p>
+            <p class="score average">Accessibility: 74</p>
+            <p class="score good">Best Practices: 88</p>
+            <p class="score poor">SEO: 45</p>
+        </div>
+
+        <div class="card">
+            <h2>🛠 Common Recommendations</h2>
+            <ul>
+                <li>Optimize and compress images for faster load time.</li>
+                <li>Use proper ARIA roles for accessibility.</li>
+                <li>Serve assets over HTTPS only.</li>
+                <li>Add descriptive meta tags for SEO.</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>🔍 Exercises</h2>
+            <ul>
+                <li>Open DevTools → Lighthouse tab.</li>
+                <li>Run an audit for Performance, Accessibility, and SEO.</li>
+                <li>Compare your results with the sample report above.</li>
+                <li>
+                    Implement at least one recommended fix and rerun the audit.
+                </li>
+            </ul>
+        </div>
+
+        <script>
+            // Simulate slow resource for Lighthouse testing
+            setTimeout(() => {
+                console.log("Simulated delay to test performance audit.");
+            }, 3000);
+        </script>
+    </body>
+</html>

@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Sources Tab — Breakpoints & Source Debugging Playground</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <style>
+            :root {
+                --bg: #0f1222;
+                --panel: #141834;
+                --muted: #a4acb9;
+                --accent: #7aa2f7;
+                --ok: #48c774;
+                --warn: #ffbe55;
+                --err: #ff6b6b;
+                --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+                    "Liberation Mono", "Courier New", monospace;
+                --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI,
+                    Roboto, "Helvetica Neue", Arial, "Noto Sans",
+                    "Apple Color Emoji", "Segoe UI Emoji";
+            }
+            html,
+            body {
+                height: 100%;
+                background: var(--bg);
+                color: #e7e9ee;
+                margin: 0;
+                font-family: var(--sans);
+            }
+            header {
+                padding: 24px 16px 8px;
+                text-align: center;
+            }
+            header h1 {
+                margin: 0 0 6px;
+                font-size: 22px;
+                font-weight: 700;
+            }
+            header p {
+                margin: 0;
+                color: var(--muted);
+                font-size: 14px;
+            }
+            main {
+                max-width: 1100px;
+                margin: 16px auto;
+                padding: 0 12px 24px;
+                display: grid;
+                gap: 16px;
+                grid-template-columns: 1.25fr 0.85fr;
+            }
+            .card {
+                background: var(--panel);
+                border: 1px solid rgba(255, 255, 255, 0.06);
+                border-radius: 16px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            }
+            .card h2 {
+                font-size: 16px;
+                margin: 0;
+                padding: 14px 14px 8px;
+                color: #d9def7;
+            }
+            .card .sub {
+                color: var(--muted);
+                font-size: 12px;
+                padding: 0 14px 10px;
+            }
+            .grid {
+                display: grid;
+                gap: 10px;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                padding: 12px;
+            }
+            .btn {
+                appearance: none;
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                background: rgba(255, 255, 255, 0.04);
+                padding: 12px;
+                border-radius: 12px;
+                color: #eaeefb;
+                font-weight: 600;
+                cursor: pointer;
+                text-align: left;
+                transition: transform 0.06s ease, background 0.2s ease,
+                    border-color 0.2s ease;
+            }
+            .btn:hover {
+                transform: translateY(-1px);
+                background: rgba(255, 255, 255, 0.07);
+            }
+            .btn small {
+                display: block;
+                color: var(--muted);
+                font-weight: 500;
+                margin-top: 6px;
+            }
+            .log {
+                padding: 12px;
+                height: 300px;
+                overflow: auto;
+                font-family: var(--mono);
+                font-size: 12px;
+                background: #0b0f24;
+                border-radius: 12px;
+                border: 1px dashed rgba(255, 255, 255, 0.12);
+            }
+            .row {
+                display: flex;
+                gap: 8px;
+                padding: 0 12px 12px;
+                flex-wrap: wrap;
+            }
+            .tag {
+                font-family: var(--mono);
+                font-size: 11px;
+                color: #cbd5e1;
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                padding: 6px 8px;
+                border-radius: 999px;
+                background: rgba(255, 255, 255, 0.03);
+            }
+            footer {
+                max-width: 1100px;
+                margin: 0 auto 30px;
+                color: var(--muted);
+                font-size: 12px;
+                padding: 0 16px;
+            }
+            code {
+                font-family: var(--mono);
+                background: rgba(255, 255, 255, 0.08);
+                padding: 1px 5px;
+                border-radius: 6px;
+            }
+            .ok {
+                color: var(--ok);
+            }
+            .warn {
+                color: var(--warn);
+            }
+            .err {
+                color: var(--err);
+            }
+            @media (max-width: 980px) {
+                main {
+                    grid-template-columns: 1fr;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1>Sources Tab — Breakpoints & Source Debugging</h1>
+            <p>
+                Use this playground to practice line/conditional breakpoints,
+                async stacks, XHR/fetch breaks, event listener and DOM
+                breakpoints, blackboxing, and the
+                <code>debugger</code> statement.
+            </p>
+        </header>
+
+        <main>
+            <!-- LEFT: Actions -->
+            <section class="card" id="actions">
+                <h2>Interactive Scenarios</h2>
+                <p class="sub">
+                    Open DevTools → <b>Sources</b>. Try setting different
+                    breakpoint types before pressing buttons.
+                </p>
+
+                <div class="grid">
+                    <button class="btn" id="btn-calc">
+                        🔢 Buggy calculation
+                        <small
+                            >Set a conditional breakpoint where
+                            <code>i === 42</code> or step into
+                            <code>offByOne()</code>.</small
+                        >
+                    </button>
+
+                    <button class="btn" id="btn-fetch">
+                        🌐 Fetch JSON (network)
+                        <small
+                            >Enable "Pause on fetch/XHR" and "Break on
+                            request/response" to stop here.</small
+                        >
+                    </button>
+
+                    <button class="btn" id="btn-xhr">
+                        📡 XHR request
+                        <small
+                            >Practice XHR breakpoints and inspect readyState
+                            changes.</small
+                        >
+                    </button>
+
+                    <button class="btn" id="btn-async">
+                        ⏱️ Async chain (macrotask → microtask)
+                        <small
+                            >Follow async stack across <code>setTimeout</code> →
+                            Promise → <code>queueMicrotask</code>.</small
+                        >
+                    </button>
+
+                    <button class="btn" id="btn-debugger">
+                        🧱 Trigger <code>debugger</code>
+                        <small
+                            >Executes <code>debugger;</code> so execution pauses
+                            immediately.</small
+                        >
+                    </button>
+
+                    <button class="btn" id="btn-dom">
+                        🧩 DOM mutation
+                        <small
+                            >Right-click element below in Elements → Break on →
+                            Subtree modifications, then click me.</small
+                        >
+                    </button>
+
+                    <button class="btn" id="btn-event">
+                        🖱️ Event listener breakpoint
+                        <small
+                            >Enable "Mouse → click" in Event Listener
+                            Breakpoints, then click this.</small
+                        >
+                    </button>
+
+                    <button class="btn" id="btn-blackbox">
+                        🕳️ Noisy 3rd-party (blackbox)
+                        <small
+                            >Blackbox <code>vendor/noise.min.js</code> to skip
+                            into your app frames.</small
+                        >
+                    </button>
+                </div>
+
+                <div class="row">
+                    <span class="tag">Line & Conditional</span>
+                    <span class="tag">XHR / Fetch</span>
+                    <span class="tag">Event Listener</span>
+                    <span class="tag">DOM Mutation</span>
+                    <span class="tag">Async Stack</span>
+                    <span class="tag">Blackboxing</span>
+                    <span class="tag">Debugger keyword</span>
+                    <span class="tag">Pretty-print</span>
+                </div>
+
+                <div style="padding: 0 12px 12px">
+                    <div
+                        id="dom-target"
+                        class="card"
+                        style="
+                            padding: 10px;
+                            border-radius: 10px;
+                            background: #0c1331;
+                            border: 1px solid rgba(255, 255, 255, 0.08);
+                        "
+                    >
+                        <b>DOM Breakpoint Target</b>
+                        <div
+                            id="dom-target-content"
+                            style="margin-top: 6px; color: var(--muted)"
+                        >
+                            Set a subtree modification breakpoint on this box,
+                            then press “DOM mutation”.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RIGHT: Log -->
+            <section class="card">
+                <h2>Runtime Log</h2>
+                <p class="sub">
+                    Messages from scenarios appear here. Also watch the Console
+                    and Network tabs.
+                </p>
+                <div id="log" class="log" aria-live="polite"></div>
+            </section>
+        </main>
+
+        <footer>
+            <p>
+                <b>Tips</b>: In Sources, expand <code>(no domain)</code> or
+                <code>top</code> → find files named by
+                <code>//# sourceURL=…</code> comments:
+                <code>app/logic.js</code>, <code>app/async.js</code>,
+                <code>app/network.js</code>, <code>vendor/noise.min.js</code>.
+                Try: conditional breakpoints, logpoints, blackbox vendor code,
+                pretty-print minified sources, add watches, and step through
+                async calls.
+            </p>
+        </footer>
+
+        <!-- ========== "Third-party" noisy library (minified style) ========== -->
+        <script>
+            /*! noise.min.js v1 */
+            (function () {
+                function n(t) {
+                    for (var e = 0, r = 0; r < t.length; r++)
+                        e = (e + (t.charCodeAt ? t.charCodeAt(r) : 0)) % 100;
+                    return e;
+                }
+                function o(u) {
+                    for (var i = 0; i < 4000; i++) u = Math.sin(u + i);
+                    return u;
+                }
+                function l(msg) {
+                    var s = n(msg) + o(0.5);
+                    return "noise:" + s;
+                }
+                function spam(fn, times) {
+                    for (var i = 0; i < times; i++)
+                        try {
+                            fn(l("hello" + i));
+                        } catch (e) {}
+                }
+                window.__NOISE_LIB__ = { spam: spam, l: l };
+            })();
+            //# sourceURL=vendor/noise.min.js
+        </script>
+
+        <!-- ========== Application: logging utility ========== -->
+        <script>
+            const $log = document.getElementById("log");
+            const log = (msg, cls) => {
+                const t = new Date().toLocaleTimeString();
+                const line = document.createElement("div");
+                if (cls) line.className = cls;
+                line.textContent = `[${t}] ${msg}`;
+                $log.appendChild(line);
+                $log.scrollTop = $log.scrollHeight;
+            };
+            //# sourceURL=app/log.js
+        </script>
+
+        <!-- ========== Application logic (breakpoint practice) ========== -->
+        <script>
+            // A small, intentionally "buggy" calc to practice stepping & conditional breakpoints.
+            function offByOne(n) {
+                // BUG: should sum 1..n inclusive, but stops early (set a line/conditional breakpoint on `i`)
+                let sum = 0;
+                for (let i = 1; i < n; i++) {
+                    // <---- set conditional breakpoint: i === 42
+                    sum += i;
+                }
+                return sum;
+            }
+
+            function heavyCompute(size = 5_000) {
+                // Hot path to test performance stepping and blackboxing vendor frames
+                let total = 0;
+                for (let i = 0; i < size; i++) {
+                    total += Math.sqrt(i) * Math.random();
+                }
+                return Math.round(total);
+            }
+
+            function runBuggyCalc() {
+                const n = 100;
+                const result = offByOne(n);
+                log(
+                    `offByOne(${n}) = ${result} (expect ~${(n * (n + 1)) / 2})`,
+                    result === (n * (n + 1)) / 2 ? "ok" : "warn"
+                );
+                return result;
+            }
+
+            // Event listener demo target
+            function onEventClick(e) {
+                log(
+                    `Click event at (${e.clientX}, ${e.clientY}) — set an "Event Listener Breakpoint" on 'Mouse → click' to stop here.`
+                );
+            }
+
+            document
+                .getElementById("btn-event")
+                .addEventListener("click", onEventClick);
+
+            // DOM mutation target
+            function mutateDom() {
+                const box = document.getElementById("dom-target-content");
+                const span = document.createElement("span");
+                span.textContent = ` DOM updated @ ${new Date().toLocaleTimeString()}`;
+                box.appendChild(span); // Right-click in Elements panel: Break on → Subtree modifications
+                log("DOM mutated: appended a <span> to #dom-target-content");
+            }
+
+            // Explicit debugger demo
+            function triggerDebugger() {
+                log("About to hit `debugger;` — execution should pause.");
+                debugger; // <-- Will pause if devtools is open
+                log("Resumed after `debugger;`"); // This appears after you continue
+            }
+
+            // Vendor noise + blackboxing demo
+            function runNoisy() {
+                // In Sources: right-click vendor/noise.min.js → Blackbox script.
+                // Then step into and observe debugger skipping vendor frames.
+                window.__NOISE_LIB__.spam((msg) => {
+                    log(`vendor noise: ${msg.substring(0, 32)}…`);
+                }, 5);
+                // Your app's own hot path
+                const score = heavyCompute(6000);
+                log(`heavyCompute score: ${score}`);
+            }
+
+            // Wire UI actions
+            document
+                .getElementById("btn-calc")
+                .addEventListener("click", runBuggyCalc);
+            document
+                .getElementById("btn-dom")
+                .addEventListener("click", mutateDom);
+            document
+                .getElementById("btn-debugger")
+                .addEventListener("click", triggerDebugger);
+            document
+                .getElementById("btn-blackbox")
+                .addEventListener("click", runNoisy);
+            //# sourceURL=app/logic.js
+        </script>
+
+        <!-- ========== Async chain & microtasks demo ========== -->
+        <script>
+            function asyncChain() {
+                log("Async chain start (set a breakpoint here, then step)…");
+                setTimeout(() => {
+                    // macrotask
+                    log("setTimeout fired → scheduling Promise then()");
+                    Promise.resolve().then(() => {
+                        // microtask
+                        log("Promise.then → scheduling queueMicrotask");
+                        queueMicrotask(() => {
+                            // microtask
+                            log("queueMicrotask → finishing chain");
+                        });
+                    });
+                }, 200);
+            }
+            document
+                .getElementById("btn-async")
+                .addEventListener("click", asyncChain);
+            //# sourceURL=app/async.js
+        </script>
+
+        <!-- ========== Network: fetch & XHR demo ========== -->
+        <script>
+            async function doFetch() {
+                log("Starting fetch to JSONPlaceholder…");
+                try {
+                    const res = await fetch(
+                        "https://jsonplaceholder.typicode.com/todos/1",
+                        { headers: { "x-demo": "sources-tab" } }
+                    );
+                    const data = await res.json();
+                    log(`Fetch OK: todo #${data.id} → "${data.title}"`, "ok");
+                } catch (err) {
+                    log(`Fetch error: ${err.message}`, "err");
+                }
+            }
+
+            function doXHR() {
+                log("Starting XHR to JSONPlaceholder…");
+                const xhr = new XMLHttpRequest();
+                xhr.open("GET", "https://jsonplaceholder.typicode.com/todos/2");
+                xhr.setRequestHeader("x-demo", "sources-tab");
+                xhr.onreadystatechange = function () {
+                    // Add an XHR breakpoint on "Ready state changes" or pause on XHR/fetch.
+                    if (xhr.readyState === 4) {
+                        if (xhr.status >= 200 && xhr.status < 300) {
+                            try {
+                                const data = JSON.parse(xhr.responseText);
+                                log(
+                                    `XHR OK: todo #${data.id} → "${data.title}"`,
+                                    "ok"
+                                );
+                            } catch (e) {
+                                log("XHR parse error: " + e.message, "err");
+                            }
+                        } else {
+                            log(`XHR error: ${xhr.status}`, "err");
+                        }
+                    }
+                };
+                xhr.send();
+            }
+
+            document
+                .getElementById("btn-fetch")
+                .addEventListener("click", doFetch);
+            document.getElementById("btn-xhr").addEventListener("click", doXHR);
+            //# sourceURL=app/network.js
+        </script>
+
+        <!--
+    ============================
+    🧪 Practice Checklist (read me!)
+    ============================
+    1) Line breakpoints: Open app/logic.js → set on `let sum = 0` and step.
+    2) Conditional breakpoints: In the for-loop (`i < n`) set condition `i === 42`.
+       Try a Logpoint with message: "i is {i}" (no pause).
+    3) DOM breakpoints: In Elements, right-click #dom-target-content → Break on → Subtree modifications → click “DOM mutation”.
+    4) Event listener breakpoints: In right sidebar (or Sources left panel) → Event Listener Breakpoints → Mouse → click → press “Event listener breakpoint”.
+    5) XHR/Fetch: Toggle DevTools "Pause on fetch/XHR" then click “Fetch JSON” or “XHR request”.
+    6) Async stack: Click “Async chain” and step through with async stack enabled. Observe microtasks order.
+    7) Debugger keyword: Click “Trigger debugger” to pause at `debugger;`.
+    8) Blackboxing: Blackbox vendor/noise.min.js and then click “Noisy 3rd-party”. Notice stepping skips vendor frames.
+    9) Pretty-print: Open vendor/noise.min.js and click "{ }" (pretty print) to reformat, then try blackboxing again.
+   -->
+    </body>
+</html>

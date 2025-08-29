@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Security Tab - Debug-Me</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 2rem;
+                background-color: #f9fafb;
+                color: #111827;
+            }
+            h1 {
+                color: #b91c1c;
+            }
+            .card {
+                background: white;
+                padding: 1.5rem;
+                margin-bottom: 1rem;
+                border-radius: 8px;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            }
+            code {
+                background: #f3f4f6;
+                padding: 0.2rem 0.4rem;
+                border-radius: 4px;
+                font-size: 0.95rem;
+            }
+            .issue {
+                border-left: 4px solid #dc2626;
+                padding-left: 1rem;
+                margin-bottom: 1rem;
+            }
+            .secure {
+                border-left: 4px solid #16a34a;
+                padding-left: 1rem;
+                margin-bottom: 1rem;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>🔐 Security Tab Debugging</h1>
+        <p>
+            The <strong>Security Tab</strong> in Chrome DevTools helps inspect
+            HTTPS, certificates, and mixed-content issues. Use it to verify your
+            site is served securely.
+        </p>
+
+        <div class="card issue">
+            <h2>⚠️ Mixed Content Issue</h2>
+            <p>This page attempts to load an insecure resource:</p>
+            <code>http://insecure-api.example.com/data</code>
+            <p>Mixed content weakens HTTPS. Update to <code>https://</code>.</p>
+        </div>
+
+        <div class="card secure">
+            <h2>✅ Secure Connection</h2>
+            <p>
+                The main document is served over <code>https://</code>.
+                Certificates are valid and issued by a trusted CA.
+            </p>
+        </div>
+
+        <div class="card">
+            <h2>🔍 Exercises</h2>
+            <ul>
+                <li>Open DevTools → Security tab and inspect this page.</li>
+                <li>Identify the mixed content request in the tab.</li>
+                <li>
+                    Fix the issue by replacing <code>http://</code> with
+                    <code>https://</code> in the request URL.
+                </li>
+                <li>
+                    Reload and verify the page shows a fully secure connection.
+                </li>
+            </ul>
+        </div>
+
+        <script>
+            // Simulate insecure request for learning purposes
+            fetch("http://insecure-api.example.com/data").catch((err) =>
+                console.warn("Blocked insecure request:", err)
+            );
+        </script>
+    </body>
+</html>

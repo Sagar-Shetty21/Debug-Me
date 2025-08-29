@@ -1,0 +1,19 @@
+{
+    "debug.console.fontSize": 14,
+    "debug.console.lineHeight": 22,
+    "debug.openDebug": "openOnDebugBreak",
+    "debug.showBreakpointsInOverviewRuler": true,
+    "debug.showInlineBreakpointCandidates": true,
+    "debug.toolBarLocation": "floating",
+    "editor.rulers": [80, 120],
+    "files.exclude": {
+        "**/node_modules": true,
+        "**/.git": true
+    },
+    "search.exclude": {
+        "**/node_modules": true
+    },
+    "emmet.includeLanguages": {
+        "javascript": "javascriptreact"
+    }
+}

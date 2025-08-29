@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Elements Tab Debugging</title>
+        <style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                    Roboto, sans-serif;
+                margin: 0;
+                padding: 20px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                color: white;
+            }
+
+            .container {
+                max-width: 1200px;
+                margin: 0 auto;
+                background: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(10px);
+                border-radius: 15px;
+                padding: 30px;
+                box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            }
+
+            .debug-section {
+                margin: 20px 0;
+                padding: 20px;
+                border: 2px dashed rgba(255, 255, 255, 0.3);
+                border-radius: 10px;
+                transition: all 0.3s ease;
+            }
+
+            .debug-section:hover {
+                border-color: #fff;
+                background: rgba(255, 255, 255, 0.1);
+                transform: translateY(-2px);
+            }
+
+            .interactive-element {
+                background: #ff6b6b;
+                color: white;
+                border: none;
+                padding: 15px 25px;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 16px;
+                margin: 10px;
+                transition: all 0.3s ease;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .interactive-element:hover {
+                background: #ff5252;
+                transform: scale(1.05);
+                box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+            }
+
+            .interactive-element:active {
+                transform: scale(0.98);
+            }
+
+            .interactive-element::before {
+                content: "";
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                width: 0;
+                height: 0;
+                background: rgba(255, 255, 255, 0.3);
+                border-radius: 50%;
+                transform: translate(-50%, -50%);
+                transition: width 0.3s, height 0.3s;
+            }
+
+            .interactive-element:active::before {
+                width: 300px;
+                height: 300px;
+            }
+
+            .form-container {
+                background: rgba(255, 255, 255, 0.15);
+                padding: 25px;
+                border-radius: 12px;
+                margin: 20px 0;
+            }
+
+            .input-group {
+                margin: 15px 0;
+            }
+
+            .input-group label {
+                display: block;
+                margin-bottom: 8px;
+                font-weight: 600;
+            }
+
+            .input-group input,
+            .input-group select,
+            .input-group textarea {
+                width: 100%;
+                padding: 12px;
+                border: 2px solid rgba(255, 255, 255, 0.3);
+                border-radius: 8px;
+                background: rgba(255, 255, 255, 0.1);
+                color: white;
+                font-size: 16px;
+                transition: border-color 0.3s ease;
+            }
+
+            .input-group input:focus,
+            .input-group select:focus,
+            .input-group textarea:focus {
+                outline: none;
+                border-color: #fff;
+                box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+            }
+
+            .input-group input::placeholder {
+                color: rgba(255, 255, 255, 0.6);
+            }
+
+            .animated-box {
+                width: 100px;
+                height: 100px;
+                background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+                border-radius: 15px;
+                margin: 20px;
+                cursor: pointer;
+                transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+                display: inline-block;
+                position: relative;
+            }
+
+            .animated-box:hover {
+                transform: rotate(180deg) scale(1.2);
+                border-radius: 50%;
+            }
+
+            .hidden-element {
+                opacity: 0;
+                transform: translateY(-20px);
+                transition: all 0.3s ease;
+                background: rgba(255, 255, 255, 0.1);
+                padding: 15px;
+                border-radius: 8px;
+                margin: 10px 0;
+            }
+
+            .hidden-element.visible {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            .data-attribute-demo[data-status="active"] {
+                border-left: 5px solid #4ecdc4;
+            }
+
+            .data-attribute-demo[data-status="inactive"] {
+                border-left: 5px solid #ff6b6b;
+            }
+
+            .data-attribute-demo[data-priority="high"] {
+                background: rgba(255, 107, 107, 0.2);
+            }
+
+            .accessibility-demo {
+                margin: 20px 0;
+                padding: 20px;
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                border-radius: 8px;
+            }
+
+            @media (max-width: 768px) {
+                .container {
+                    padding: 15px;
+                    margin: 10px;
+                }
+
+                .debug-section {
+                    padding: 15px;
+                }
+            }
+
+            /* Debug helper classes */
+            .debug-highlight {
+                outline: 3px dashed yellow !important;
+                background: rgba(255, 255, 0, 0.1) !important;
+            }
+
+            .debug-info::after {
+                content: " [DEBUG]";
+                background: red;
+                color: white;
+                padding: 2px 6px;
+                font-size: 10px;
+                border-radius: 3px;
+                margin-left: 5px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>🔍 Elements Tab Debugging Practice</h1>
+            <p>
+                Practice debugging using the browser's Elements tab. Right-click
+                elements and inspect them!
+            </p>
+
+            <!-- DEBUG EXERCISE 1: DOM Inspection -->
+            <section class="debug-section" id="dom-inspection">
+                <h2>1. DOM Structure Inspection</h2>
+                <p>
+                    🎯 <strong>Debug Task:</strong> Inspect these elements and
+                    examine their structure
+                </p>
+
+                <div class="nested-structure">
+                    <div class="parent" data-level="1">
+                        <div class="child" data-level="2">
+                            <span class="grandchild" data-level="3"
+                                >Deeply nested element</span
+                            >
+                        </div>
+                    </div>
+                </div>
+
+                <ul id="dynamic-list">
+                    <!-- Elements will be added here dynamically -->
+                </ul>
+            </section>
+
+            <!-- DEBUG EXERCISE 2: CSS Debugging -->
+            <section class="debug-section" id="css-debugging">
+                <h2>2. CSS Debugging</h2>
+                <p>
+                    🎯 <strong>Debug Task:</strong> Inspect styles, modify CSS
+                    properties live
+                </p>
+
+                <div class="interactive-element" onclick="toggleElement(this)">
+                    Click to Toggle State
+                </div>
+
+                <div class="animated-box" onclick="animateBox(this)">
+                    Hover & Click Me
+                </div>
+
+                <!-- Element with problematic CSS -->
+                <div
+                    id="problematic-element"
+                    style="margin-top: 50px; border: 1px solid red"
+                >
+                    This element has some CSS issues to debug
+                </div>
+            </section>
+
+            <!-- DEBUG EXERCISE 3: Attributes and Data -->
+            <section class="debug-section" id="attributes-debugging">
+                <h2>3. Attributes & Data Debugging</h2>
+                <p>
+                    🎯 <strong>Debug Task:</strong> Examine data attributes,
+                    modify them in DevTools
+                </p>
+
+                <div
+                    class="data-attribute-demo"
+                    data-status="active"
+                    data-priority="high"
+                    data-user-id="12345"
+                    data-timestamp="1640995200000"
+                >
+                    Element with data attributes
+                </div>
+
+                <button
+                    class="interactive-element"
+                    id="attr-button"
+                    onclick="changeAttributes(this)"
+                    data-click-count="0"
+                >
+                    Click to Change Attributes
+                </button>
+            </section>
+
+            <!-- DEBUG EXERCISE 4: Event Listeners -->
+            <section class="debug-section" id="event-debugging">
+                <h2>4. Event Listener Debugging</h2>
+                <p>
+                    🎯 <strong>Debug Task:</strong> Use Elements tab to view
+                    event listeners
+                </p>
+
+                <button id="multi-event-button" class="interactive-element">
+                    Button with Multiple Event Listeners
+                </button>
+
+                <div
+                    id="event-container"
+                    style="
+                        padding: 20px;
+                        border: 1px dashed white;
+                        margin: 10px;
+                    "
+                >
+                    <p>Click anywhere in this container</p>
+                    <button class="interactive-element">Nested Button</button>
+                </div>
+            </section>
+
+            <!-- DEBUG EXERCISE 5: Form Debugging -->
+            <section class="debug-section" id="form-debugging">
+                <div class="form-container">
+                    <h2>5. Form Element Debugging</h2>
+                    <p>
+                        🎯 <strong>Debug Task:</strong> Inspect form state,
+                        validation, and values
+                    </p>
+
+                    <form id="debug-form" onsubmit="handleFormSubmit(event)">
+                        <div class="input-group">
+                            <label for="username">Username:</label>
+                            <input
+                                type="text"
+                                id="username"
+                                name="username"
+                                placeholder="Enter username"
+                                required
+                                minlength="3"
+                                data-validation="required"
+                            />
+                        </div>
+
+                        <div class="input-group">
+                            <label for="email">Email:</label>
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                placeholder="Enter email"
+                                required
+                                data-validation="email"
+                            />
+                        </div>
+
+                        <div class="input-group">
+                            <label for="age">Age:</label>
+                            <input
+                                type="number"
+                                id="age"
+                                name="age"
+                                min="18"
+                                max="100"
+                                data-validation="number"
+                            />
+                        </div>
+
+                        <div class="input-group">
+                            <label for="country">Country:</label>
+                            <select
+                                id="country"
+                                name="country"
+                                data-validation="required"
+                            >
+                                <option value="">Select country</option>
+                                <option value="us">United States</option>
+                                <option value="uk">United Kingdom</option>
+                                <option value="ca">Canada</option>
+                                <option value="au">Australia</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="bio">Bio:</label>
+                            <textarea
+                                id="bio"
+                                name="bio"
+                                placeholder="Tell us about yourself"
+                                rows="4"
+                            ></textarea>
+                        </div>
+
+                        <button type="submit" class="interactive-element">
+                            Submit Form
+                        </button>
+                        <button
+                            type="button"
+                            class="interactive-element"
+                            onclick="populateForm()"
+                        >
+                            Populate Test Data
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- DEBUG EXERCISE 6: Accessibility -->
+            <section
+                class="debug-section accessibility-demo"
+                id="accessibility-debugging"
+            >
+                <h2>6. Accessibility Debugging</h2>
+                <p>
+                    🎯 <strong>Debug Task:</strong> Use Accessibility panel in
+                    Elements tab
+                </p>
+
+                <!-- Good accessibility examples -->
+                <button
+                    aria-label="Close dialog"
+                    aria-describedby="close-desc"
+                    class="interactive-element"
+                >
+                    ×
+                </button>
+                <div id="close-desc" class="sr-only">
+                    This will close the dialog window
+                </div>
+
+                <!-- Poor accessibility examples (to debug) -->
+                <div onclick="poorlyAccessibleClick()">
+                    Clickable div (bad practice)
+                </div>
+                <img
+                    src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzMzMzMzMyIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+SW1hZ2U8L3RleHQ+PC9zdmc+"
+                    style="width: 100px; height: 100px; margin: 10px"
+                />
+
+                <!-- ARIA debugging -->
+                <div role="tablist" aria-label="Settings tabs">
+                    <button
+                        role="tab"
+                        aria-selected="true"
+                        aria-controls="tab1-panel"
+                        id="tab1"
+                        class="interactive-element"
+                    >
+                        General
+                    </button>
+                    <button
+                        role="tab"
+                        aria-selected="false"
+                        aria-controls="tab2-panel"
+                        id="tab2"
+                        class="interactive-element"
+                    >
+                        Privacy
+                    </button>
+                </div>
+
+                <div
+                    role="tabpanel"
+                    id="tab1-panel"
+                    aria-labelledby="tab1"
+                    style="
+                        margin-top: 10px;
+                        padding: 15px;
+                        background: rgba(255, 255, 255, 0.1);
+                    "
+                >
+                    General settings content
+                </div>
+            </section>
+
+            <!-- DEBUG EXERCISE 7: Dynamic Content -->
+            <section class="debug-section" id="dynamic-content">
+                <h2>7. Dynamic Content Debugging</h2>
+                <p>
+                    🎯 <strong>Debug Task:</strong> Watch DOM changes in
+                    real-time
+                </p>
+
+                <button
+                    class="interactive-element"
+                    onclick="addDynamicContent()"
+                >
+                    Add Dynamic Content
+                </button>
+
+                <button
+                    class="interactive-element"
+                    onclick="modifyExistingContent()"
+                >
+                    Modify Existing Content
+                </button>
+
+                <button class="interactive-element" onclick="removeContent()">
+                    Remove Content
+                </button>
+
+                <div id="dynamic-container">
+                    <!-- Dynamic content will be added here -->
+                </div>
+            </section>
+
+            <!-- DEBUG EXERCISE 8: Performance Issues -->
+            <section class="debug-section" id="performance-css">
+                <h2>8. CSS Performance Debugging</h2>
+                <p>
+                    🎯 <strong>Debug Task:</strong> Identify performance issues
+                    using Elements tab
+                </p>
+
+                <button
+                    class="interactive-element"
+                    onclick="createManyElements()"
+                >
+                    Create Many Elements (Performance Test)
+                </button>
+
+                <button class="interactive-element" onclick="triggerReflow()">
+                    Trigger Layout Reflow
+                </button>
+
+                <div id="performance-container">
+                    <!-- Performance test elements will be added here -->
+                </div>
+            </section>
+        </div>
+
+        <script>
+            // Global variables for debugging
+            let clickCount = 0;
+            let dynamicElementId = 0;
+
+            console.log("🔍 Elements Tab Debugging Script Loaded");
+            console.log("Open DevTools > Elements tab to start debugging!");
+
+            // DEBUG EXERCISE FUNCTIONS
+
+            /**
+             * Toggle element state for debugging
+             */
+            function toggleElement(element) {
+                console.log("🔄 Toggling element state");
+
+                // DEBUGGING: Set breakpoint here and inspect element
+                debugger;
+
+                element.classList.toggle("active");
+                element.style.background = element.classList.contains("active")
+                    ? "#4ecdc4"
+                    : "#ff6b6b";
+
+                // Update data attribute
+                const currentState =
+                    element.getAttribute("data-state") || "inactive";
+                const newState =
+                    currentState === "active" ? "inactive" : "active";
+                element.setAttribute("data-state", newState);
+
+                console.log("Element state changed to:", newState);
+            }
+
+            /**
+             * Animate box for CSS debugging
+             */
+            function animateBox(box) {
+                console.log("🎬 Animating box");
+
+                // Add temporary class for animation
+                box.classList.add("animating");
+
+                setTimeout(() => {
+                    box.classList.remove("animating");
+                    console.log("Animation completed");
+                }, 500);
+            }
+
+            /**
+             * Change attributes dynamically
+             */
+            function changeAttributes(button) {
+                clickCount++;
+
+                // Update multiple attributes
+                button.setAttribute("data-click-count", clickCount);
+                button.setAttribute(
+                    "aria-label",
+                    `Clicked ${clickCount} times`
+                );
+                button.title = `This button has been clicked ${clickCount} times`;
+
+                // Change class based on click count
+                if (clickCount % 3 === 0) {
+                    button.className = "interactive-element special-state";
+                } else {
+                    button.className = "interactive-element";
+                }
+
+                // Update text content
+                button.textContent = `Clicked ${clickCount} times`;
+
+                console.log(`Button clicked ${clickCount} times`);
+
+                // DEBUGGING: Inspect button element to see attribute changes
+            }
+
+            /**
+             * Add dynamic content to DOM
+             */
+            function addDynamicContent() {
+                const container = document.getElementById("dynamic-container");
+                dynamicElementId++;
+
+                const newElement = document.createElement("div");
+                newElement.id = `dynamic-element-${dynamicElementId}`;
+                newElement.className = "hidden-element";
+                newElement.setAttribute(
+                    "data-created",
+                    new Date().toISOString()
+                );
+                newElement.setAttribute("data-element-id", dynamicElementId);
+                newElement.innerHTML = `
+                <h4>Dynamic Element #${dynamicElementId}</h4>
+                <p>Created at: ${new Date().toLocaleTimeString()}</p>
+                <button onclick="removeDynamicElement(${dynamicElementId})" class="interactive-element">Remove</button>
+            `;
+
+                container.appendChild(newElement);
+
+                // Trigger animation
+                setTimeout(() => {
+                    newElement.classList.add("visible");
+                }, 10);
+
+                console.log(`Added dynamic element #${dynamicElementId}`);
+
+                // DEBUGGING: Watch DOM changes in Elements tab
+                // Look for the new element appearing
+            }
+
+            /**
+             * Modify existing content
+             */
+            function modifyExistingContent() {
+                const elements = document.querySelectorAll(
+                    "#dynamic-container .hidden-element"
+                );
+
+                elements.forEach((element, index) => {
+                    // Modify various properties
+                    element.style.background = `hsl(${
+                        Math.random() * 360
+                    }, 70%, 50%, 0.2)`;
+                    element.setAttribute("data-modified", "true");
+                    element.setAttribute("data-modification-time", Date.now());
+
+                    // Add debug class
+                    element.classList.add("debug-highlight");
+
+                    // Remove highlight after delay
+                    setTimeout(() => {
+                        element.classList.remove("debug-highlight");
+                    }, 1000);
+                });
+
+                console.log(`Modified ${elements.length} existing elements`);
+
+                // DEBUGGING: Watch style changes in real-time
+            }
+
+            /**
+             * Remove content from DOM
+             */
+            function removeContent() {
+                const container = document.getElementById("dynamic-container");
+                const elements = container.children;
+
+                if (elements.length > 0) {
+                    const elementToRemove = elements[elements.length - 1];
+                    const elementId =
+                        elementToRemove.getAttribute("data-element-id");
+
+                    // Animate out
+                    elementToRemove.classList.remove("visible");
+
+                    setTimeout(() => {
+                        container.removeChild(elementToRemove);
+                        console.log(`Removed dynamic element #${elementId}`);
+                    }, 300);
+
+                    // DEBUGGING: Watch element removal in DOM tree
+                } else {
+                    console.log("No elements to remove");
+                }
+            }
+
+            /**
+             * Remove specific dynamic element
+             */
+            function removeDynamicElement(id) {
+                const element = document.getElementById(
+                    `dynamic-element-${id}`
+                );
+                if (element) {
+                    element.classList.remove("visible");
+                    setTimeout(() => {
+                        element.remove();
+                        console.log(`Removed specific element #${id}`);
+                    }, 300);
+                }
+            }
+
+            /**
+             * Create many elements for performance testing
+             */
+            function createManyElements() {
+                const container = document.getElementById(
+                    "performance-container"
+                );
+                const startTime = performance.now();
+
+                console.log("🏗️  Creating 1000 elements...");
+
+                // This might cause performance issues
+                for (let i = 0; i < 1000; i++) {
+                    const element = document.createElement("div");
+                    element.textContent = `Element ${i}`;
+                    element.className = "performance-test-element";
+                    element.style.cssText = `
+                    display: inline-block;
+                    width: 50px;
+                    height: 50px;
+                    margin: 2px;
+                    background: hsl(${i % 360}, 70%, 50%);
+                    border-radius: 50%;
+                `;
+                    container.appendChild(element);
+                }
+
+                const endTime = performance.now();
+                console.log(
+                    `Elements created in ${(endTime - startTime).toFixed(2)}ms`
+                );
+
+                // DEBUGGING: Monitor performance impact in Elements tab
+                // Look for layout thrashing or style recalculations
+            }
+
+            /**
+             * Trigger layout reflow for performance debugging
+             */
+            function triggerReflow() {
+                const elements = document.querySelectorAll(
+                    ".performance-test-element"
+                );
+
+                console.log("🔄 Triggering layout reflows...");
+                const startTime = performance.now();
+
+                // This causes many reflows (bad practice)
+                elements.forEach((element, index) => {
+                    if (index < 100) {
+                        // Limit to avoid browser freeze
+                        element.style.width = Math.random() * 100 + "px";
+                        element.style.height = Math.random() * 100 + "px";
+
+                        // Force reflow by reading layout property
+                        const width = element.offsetWidth;
+                    }
+                });
+
+                const endTime = performance.now();
+                console.log(
+                    `Reflows triggered in ${(endTime - startTime).toFixed(2)}ms`
+                );
+
+                // DEBUGGING: Use Performance tab to see layout thrashing
+            }
+
+            /**
+             * Handle form submission for debugging
+             */
+            function handleFormSubmit(event) {
+                event.preventDefault();
+                console.log("📋 Form submission intercepted");
+
+                const formData = new FormData(event.target);
+                const formObject = Object.fromEntries(formData.entries());
+
+                console.log("Form data:", formObject);
+
+                // Validate form data
+                const errors = validateFormData(formObject);
+                if (errors.length > 0) {
+                    console.error("❌ Form validation errors:", errors);
+                    displayFormErrors(errors);
+                } else {
+                    console.log("✅ Form validation passed");
+                }
+
+                // DEBUGGING: Set breakpoint to examine form state
+                debugger;
+            }
+
+            /**
+             * Validate form data
+             */
+            function validateFormData(data) {
+                const errors = [];
+
+                if (!data.username || data.username.length < 3) {
+                    errors.push("Username must be at least 3 characters");
+                }
+
+                if (!data.email || !data.email.includes("@")) {
+                    errors.push("Valid email is required");
+                }
+
+                if (data.age && (data.age < 18 || data.age > 100)) {
+                    errors.push("Age must be between 18 and 100");
+                }
+
+                return errors;
+            }
+
+            /**
+             * Display form errors
+             */
+            function displayFormErrors(errors) {
+                // Remove existing error messages
+                const existingErrors =
+                    document.querySelectorAll(".error-message");
+                existingErrors.forEach((error) => error.remove());
+
+                // Add new error messages
+                errors.forEach((error) => {
+                    const errorElement = document.createElement("div");
+                    errorElement.className = "error-message";
+                    errorElement.style.cssText =
+                        "color: #ff6b6b; margin: 5px 0; font-weight: bold;";
+                    errorElement.textContent = error;
+
+                    const form = document.getElementById("debug-form");
+                    form.insertBefore(errorElement, form.firstChild);
+                });
+            }
+
+            /**
+             * Populate form with test data
+             */
+            function populateForm() {
+                document.getElementById("username").value = "debuguser";
+                document.getElementById("email").value = "debug@example.com";
+                document.getElementById("age").value = "25";
+                document.getElementById("country").value = "us";
+                document.getElementById("bio").value =
+                    "This is test data for debugging purposes.";
+
+                console.log("📝 Form populated with test data");
+            }
+
+            /**
+             * Poor accessibility function for debugging
+             */
+            function poorlyAccessibleClick() {
+                alert("This div should have been a button for accessibility!");
+                console.warn(
+                    "⚠️  Accessibility issue: div used for clickable element"
+                );
+            }
+
+            // Event listeners setup
+            document.addEventListener("DOMContentLoaded", function () {
+                console.log(
+                    "🎯 DOM Content Loaded - Setting up debugging exercises"
+                );
+
+                // Add multiple event listeners to demonstrate event debugging
+                const multiEventButton =
+                    document.getElementById("multi-event-button");
+
+                multiEventButton.addEventListener("click", function (e) {
+                    console.log("Click event triggered");
+                });
+
+                multiEventButton.addEventListener("mousedown", function (e) {
+                    console.log("Mouse down event triggered");
+                });
+
+                multiEventButton.addEventListener("mouseup", function (e) {
+                    console.log("Mouse up event triggered");
+                });
+
+                // Event delegation example
+                const eventContainer =
+                    document.getElementById("event-container");
+                eventContainer.addEventListener("click", function (e) {
+                    console.log(
+                        "Event delegation:",
+                        e.target.tagName,
+                        e.target.textContent
+                    );
+
+                    // DEBUGGING: Examine event object and target
+                    debugger;
+                });
+
+                // Add some initial dynamic content
+                addDynamicContent();
+                addDynamicContent();
+
+                console.log("✅ All event listeners and initial content added");
+            });
+
+            // Console debugging helpers
+            console.group("🔍 Elements Tab Debugging Tips");
+            console.log('1. Right-click any element and select "Inspect"');
+            console.log("2. Use Elements tab to view DOM structure");
+            console.log(
+                "3. Click on elements to see their styles in Styles panel"
+            );
+            console.log("4. Modify CSS properties directly in Styles panel");
+            console.log("5. Use Event Listeners panel to see attached events");
+            console.log("6. Check Accessibility panel for a11y issues");
+            console.log("7. Use DOM breakpoints to pause when elements change");
+            console.groupEnd();
+        </script>
+    </body>
+</html>
