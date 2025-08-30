@@ -1,0 +1,276 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "🚀 Debug Current File",
+            "type": "node",
+            "request": "launch",
+            "program": "${file}",
+            "skipFiles": ["<node_internals>/**"],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
+        },
+        {
+            "name": "🎯 Debug Main App",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/index.js",
+            "skipFiles": ["<node_internals>/**"],
+            "console": "integratedTerminal",
+            "env": {
+                "NODE_ENV": "development",
+                "DEBUG": "*"
+            }
+        },
+        {
+            "name": "🌐 Debug Express Server",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/server.js",
+            "skipFiles": ["<node_internals>/**"],
+            "console": "integratedTerminal",
+            "env": {
+                "NODE_ENV": "development",
+                "PORT": "3000"
+            },
+            "restart": true,
+            "runtimeArgs": ["--inspect"],
+            "autoAttachChildProcesses": true
+        },
+        {
+            "name": "🔗 Attach to Running Process",
+            "type": "node",
+            "request": "attach",
+            "port": 9229,
+            "skipFiles": ["<node_internals>/**"],
+            "localRoot": "${workspaceFolder}",
+            "remoteRoot": "."
+        },
+        {
+            "name": "🧪 Debug Jest Tests",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/node_modules/.bin/jest",
+            "args": ["--runInBand", "--no-cache", "--testTimeout=30000"],
+            "skipFiles": ["<node_internals>/**"],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "env": {
+                "NODE_ENV": "test"
+            }
+        },
+        {
+            "name": "🎪 Debug Jest Single Test",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/node_modules/.bin/jest",
+            "args": ["--runInBand", "--no-cache", "${fileBasenameNoExtension}"],
+            "skipFiles": ["<node_internals>/**"],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
+        },
+        {
+            "name": "📦 Debug npm Script",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": ["run", "debug"],
+            "skipFiles": ["<node_internals>/**"],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "⚡ Debug with Nodemon",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/node_modules/nodemon/bin/nodemon.js",
+            "args": ["src/index.js"],
+            "skipFiles": ["<node_internals>/**"],
+            "console": "integratedTerminal",
+            "restart": true,
+            "env": {
+                "NODE_ENV": "development"
+            }
+        },
+        {
+            "name": "🔧 Debug TypeScript",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/index.ts",
+            "preLaunchTask": "tsc: build",
+            "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+            "skipFiles": ["<node_internals>/**"],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "⚡ Debug TypeScript (ts-node)",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/index.ts",
+            "runtimeArgs": ["-r", "ts-node/register"],
+            "skipFiles": ["<node_internals>/**"],
+            "console": "integratedTerminal",
+            "env": {
+                "TS_NODE_FILES": "true"
+            }
+        },
+        {
+            "name": "🌐 Debug Browser (Chrome)",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:3000",
+            "webRoot": "${workspaceFolder}/public",
+            "sourceMaps": true,
+            "userDataDir": "${workspaceFolder}/.vscode/chrome-debug-profile",
+            "runtimeArgs": [
+                "--disable-web-security",
+                "--allow-running-insecure-content"
+            ]
+        },
+        {
+            "name": "🔗 Attach to Chrome",
+            "type": "chrome",
+            "request": "attach",
+            "port": 9222,
+            "webRoot": "${workspaceFolder}/public",
+            "sourceMaps": true
+        },
+        {
+            "name": "🦊 Debug Firefox",
+            "type": "firefox",
+            "request": "launch",
+            "url": "http://localhost:3000",
+            "webRoot": "${workspaceFolder}/public",
+            "firefoxExecutable": "/usr/bin/firefox"
+        },
+        {
+            "name": "🎭 Debug Playwright Tests",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/node_modules/.bin/playwright",
+            "args": ["test", "--debug"],
+            "skipFiles": ["<node_internals>/**"],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "🎪 Debug Mocha Tests",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/node_modules/.bin/mocha",
+            "args": ["--recursive", "--timeout", "5000", "test/**/*.js"],
+            "skipFiles": ["<node_internals>/**"],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "🔍 Debug with Environment Variables",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/index.js",
+            "skipFiles": ["<node_internals>/**"],
+            "console": "integratedTerminal",
+            "env": {
+                "NODE_ENV": "development",
+                "DEBUG": "app:*",
+                "LOG_LEVEL": "debug",
+                "DATABASE_URL": "mongodb://localhost:27017/debugme"
+            },
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "name": "🐳 Debug in Docker Container",
+            "type": "node",
+            "request": "attach",
+            "port": 9229,
+            "address": "localhost",
+            "localRoot": "${workspaceFolder}",
+            "remoteRoot": "/app",
+            "skipFiles": ["<node_internals>/**"]
+        },
+        {
+            "name": "🔗 Debug Remote Process",
+            "type": "node",
+            "request": "attach",
+            "address": "192.168.1.100",
+            "port": 9229,
+            "localRoot": "${workspaceFolder}",
+            "remoteRoot": "/var/www/app",
+            "skipFiles": ["<node_internals>/**"]
+        },
+        {
+            "name": "⚙️ Debug Worker Thread",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/worker.js",
+            "skipFiles": ["<node_internals>/**"],
+            "console": "integratedTerminal",
+            "autoAttachChildProcesses": true
+        },
+        {
+            "name": "🔄 Debug Child Process",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/parent.js",
+            "skipFiles": ["<node_internals>/**"],
+            "console": "integratedTerminal",
+            "autoAttachChildProcesses": true
+        },
+        {
+            "name": "📱 Debug React App",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:3000",
+            "webRoot": "${workspaceFolder}/src",
+            "sourceMaps": true,
+            "diagnosticLogging": true,
+            "runtimeArgs": ["--disable-dev-shm-usage"]
+        },
+        {
+            "name": "⚡ Debug Next.js App",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:3000",
+            "webRoot": "${workspaceFolder}",
+            "sourceMaps": true,
+            "sourceMapPathOverrides": {
+                "webpack:///./*": "${webRoot}/*",
+                "webpack:///src/*": "${webRoot}/*",
+                "webpack:///*": "*"
+            }
+        },
+        {
+            "name": "🎯 Debug with Custom Args",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/cli.js",
+            "args": ["--config", "debug.json", "--verbose"],
+            "skipFiles": ["<node_internals>/**"],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "🚨 Debug with Error Handling",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/index.js",
+            "skipFiles": ["<node_internals>/**"],
+            "console": "integratedTerminal",
+            "stopOnEntry": false,
+            "runtimeArgs": ["--unhandled-rejections=strict"]
+        }
+    ],
+    "compounds": [
+        {
+            "name": "🎪 Full Stack Debug (Server + Client)",
+            "configurations": [
+                "🌐 Debug Express Server",
+                "🌐 Debug Browser (Chrome)"
+            ]
+        },
+        {
+            "name": "🧪 Test Environment",
+            "configurations": [
+                "🧪 Debug Jest Tests",
+                "🌐 Debug Browser (Chrome)"
+            ]
+        }
+    ]
+}

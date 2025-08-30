@@ -2,85 +2,554 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <title>Security Tab - Debug-Me</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Security Debugging - DevTools Security Tab</title>
         <style>
             body {
-                font-family: Arial, sans-serif;
-                margin: 2rem;
-                background-color: #f9fafb;
-                color: #111827;
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 20px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: #333;
+                min-height: 100vh;
             }
-            h1 {
-                color: #b91c1c;
-            }
-            .card {
+
+            .container {
                 background: white;
-                padding: 1.5rem;
-                margin-bottom: 1rem;
+                border-radius: 15px;
+                padding: 30px;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            }
+
+            h1 {
+                color: #e74c3c;
+                text-align: center;
+                margin-bottom: 10px;
+                font-size: 2.5em;
+            }
+
+            .subtitle {
+                text-align: center;
+                color: #666;
+                margin-bottom: 30px;
+                font-style: italic;
+            }
+
+            .security-section {
+                margin: 30px 0;
+                padding: 20px;
+                border-left: 4px solid #e74c3c;
+                background: #ffeaa7;
                 border-radius: 8px;
-                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
             }
-            code {
-                background: #f3f4f6;
-                padding: 0.2rem 0.4rem;
-                border-radius: 4px;
-                font-size: 0.95rem;
+
+            .security-section h2 {
+                color: #c0392b;
+                margin-top: 0;
             }
-            .issue {
-                border-left: 4px solid #dc2626;
-                padding-left: 1rem;
-                margin-bottom: 1rem;
+
+            .vulnerability {
+                background: #fff5f5;
+                border: 1px solid #fed7d7;
+                border-radius: 8px;
+                padding: 15px;
+                margin: 15px 0;
             }
-            .secure {
-                border-left: 4px solid #16a34a;
-                padding-left: 1rem;
-                margin-bottom: 1rem;
+
+            .vulnerability h3 {
+                color: #c53030;
+                margin-top: 0;
+            }
+
+            .code-block {
+                background: #2d3748;
+                color: #e2e8f0;
+                padding: 15px;
+                border-radius: 8px;
+                font-family: "Courier New", monospace;
+                overflow-x: auto;
+                margin: 10px 0;
+            }
+
+            .warning {
+                background: #fff3cd;
+                border: 1px solid #ffeaa7;
+                color: #856404;
+                padding: 15px;
+                border-radius: 8px;
+                margin: 15px 0;
+            }
+
+            .info {
+                background: #d1ecf1;
+                border: 1px solid #b6d4fe;
+                color: #0c5460;
+                padding: 15px;
+                border-radius: 8px;
+                margin: 15px 0;
+            }
+
+            button {
+                background: #e74c3c;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 5px;
+                cursor: pointer;
+                margin: 5px;
+                font-size: 14px;
+                transition: all 0.3s ease;
+            }
+
+            button:hover {
+                background: #c0392b;
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+            }
+
+            input,
+            textarea {
+                width: 100%;
+                padding: 10px;
+                margin: 5px 0;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                box-sizing: border-box;
+            }
+
+            .results {
+                background: #f8f9fa;
+                border-radius: 8px;
+                padding: 15px;
+                margin: 15px 0;
+                min-height: 50px;
+            }
+
+            .security-status {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 10px 20px;
+                background: #dc3545;
+                color: white;
+                border-radius: 20px;
+                font-weight: bold;
+                box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+            }
+
+            .csp-violation {
+                background: #f8d7da;
+                border: 1px solid #f5c6cb;
+                color: #721c24;
+                padding: 10px;
+                border-radius: 5px;
+                margin: 10px 0;
+                font-family: monospace;
             }
         </style>
+
+        <!-- Intentionally insecure Content Security Policy for demonstration -->
+        <meta
+            http-equiv="Content-Security-Policy"
+            content="default-src 'self' 'unsafe-inline' 'unsafe-eval' *"
+        />
     </head>
     <body>
-        <h1>🔐 Security Tab Debugging</h1>
-        <p>
-            The <strong>Security Tab</strong> in Chrome DevTools helps inspect
-            HTTPS, certificates, and mixed-content issues. Use it to verify your
-            site is served securely.
-        </p>
+        <div class="security-status">🔓 Security Issues Present</div>
 
-        <div class="card issue">
-            <h2>⚠️ Mixed Content Issue</h2>
-            <p>This page attempts to load an insecure resource:</p>
-            <code>http://insecure-api.example.com/data</code>
-            <p>Mixed content weakens HTTPS. Update to <code>https://</code>.</p>
-        </div>
-
-        <div class="card secure">
-            <h2>✅ Secure Connection</h2>
-            <p>
-                The main document is served over <code>https://</code>.
-                Certificates are valid and issued by a trusted CA.
+        <div class="container">
+            <h1>🛡️ Security Debugging Demo</h1>
+            <p class="subtitle">
+                Learn to identify and debug security vulnerabilities using
+                DevTools Security Tab
             </p>
-        </div>
 
-        <div class="card">
-            <h2>🔍 Exercises</h2>
-            <ul>
-                <li>Open DevTools → Security tab and inspect this page.</li>
-                <li>Identify the mixed content request in the tab.</li>
-                <li>
-                    Fix the issue by replacing <code>http://</code> with
-                    <code>https://</code> in the request URL.
-                </li>
-                <li>
-                    Reload and verify the page shows a fully secure connection.
-                </li>
-            </ul>
+            <div class="info">
+                <strong>🔍 How to Debug:</strong><br />
+                1. Open DevTools (F12)<br />
+                2. Go to Security tab<br />
+                3. Check for security warnings and certificate issues<br />
+                4. Look for mixed content warnings<br />
+                5. Monitor CSP violations in Console<br />
+                6. Use Network tab to identify insecure requests
+            </div>
+
+            <div class="security-section">
+                <h2>1. Cross-Site Scripting (XSS) Vulnerabilities</h2>
+
+                <div class="vulnerability">
+                    <h3>🚨 DOM-based XSS</h3>
+                    <p>Enter some text (try entering script tags):</p>
+                    <input
+                        type="text"
+                        id="userInput"
+                        placeholder="Type something here..."
+                    />
+                    <button onclick="displayUserInput()">Display Input</button>
+                    <div id="output" class="results"></div>
+
+                    <div class="warning">
+                        <strong>Security Issue:</strong> This directly inserts
+                        user input into DOM without sanitization.
+                    </div>
+                </div>
+
+                <div class="vulnerability">
+                    <h3>🚨 innerHTML XSS</h3>
+                    <textarea
+                        id="htmlInput"
+                        placeholder="Enter HTML content..."
+                        rows="3"
+                    ></textarea>
+                    <button onclick="injectHTML()">Inject HTML</button>
+                    <div id="htmlOutput" class="results"></div>
+
+                    <div class="code-block">
+                        // Vulnerable code:
+                        document.getElementById('htmlOutput').innerHTML =
+                        userHTML; // Secure alternative:
+                        document.getElementById('htmlOutput').textContent =
+                        userHTML;
+                    </div>
+                </div>
+            </div>
+
+            <div class="security-section">
+                <h2>2. Content Security Policy (CSP) Violations</h2>
+
+                <div class="vulnerability">
+                    <h3>🚨 Inline Script Execution</h3>
+                    <button onclick="executeInlineScript()">
+                        Execute Inline Script
+                    </button>
+                    <div id="cspResults" class="results"></div>
+
+                    <div class="warning">
+                        <strong>CSP Violation:</strong> Check Console for CSP
+                        violation reports when executing inline scripts.
+                    </div>
+                </div>
+
+                <div class="vulnerability">
+                    <h3>🚨 eval() Usage</h3>
+                    <input
+                        type="text"
+                        id="evalInput"
+                        placeholder="Enter JavaScript code to eval()"
+                    />
+                    <button onclick="dangerousEval()">
+                        Execute with eval()
+                    </button>
+                    <div id="evalResults" class="results"></div>
+
+                    <div class="code-block">
+                        // Dangerous: eval(userCode); // Better alternatives: //
+                        - Use Function constructor // - Parse JSON safely // -
+                        Validate and sanitize input
+                    </div>
+                </div>
+            </div>
+
+            <div class="security-section">
+                <h2>3. Mixed Content Issues</h2>
+
+                <div class="vulnerability">
+                    <h3>🚨 HTTP Resources on HTTPS Page</h3>
+                    <button onclick="loadMixedContent()">
+                        Load HTTP Image
+                    </button>
+                    <div id="mixedContentArea" class="results"></div>
+
+                    <div class="warning">
+                        <strong>Mixed Content:</strong> Loading HTTP resources
+                        on HTTPS pages triggers security warnings.
+                    </div>
+                </div>
+            </div>
+
+            <div class="security-section">
+                <h2>4. Insecure Data Storage</h2>
+
+                <div class="vulnerability">
+                    <h3>🚨 Sensitive Data in LocalStorage</h3>
+                    <input
+                        type="text"
+                        id="sensitiveData"
+                        placeholder="Enter sensitive data"
+                    />
+                    <button onclick="storeSensitiveData()">
+                        Store in LocalStorage
+                    </button>
+                    <button onclick="displayStoredData()">
+                        Display Stored Data
+                    </button>
+                    <div id="storageResults" class="results"></div>
+
+                    <div class="warning">
+                        <strong>Security Issue:</strong> LocalStorage is not
+                        secure for sensitive data - it's accessible via
+                        JavaScript.
+                    </div>
+                </div>
+            </div>
+
+            <div class="security-section">
+                <h2>5. Insecure HTTP Requests</h2>
+
+                <div class="vulnerability">
+                    <h3>🚨 HTTP API Calls</h3>
+                    <button onclick="makeInsecureRequest()">
+                        Make HTTP API Call
+                    </button>
+                    <div id="apiResults" class="results"></div>
+
+                    <div class="code-block">
+                        // Insecure: fetch('http://api.example.com/data') //
+                        Secure: fetch('https://api.example.com/data')
+                    </div>
+                </div>
+            </div>
+
+            <div class="security-section">
+                <h2>6. Debug Console Output</h2>
+                <div id="securityLogs" class="csp-violation">
+                    Security events and CSP violations will be logged here...
+                </div>
+            </div>
+
+            <div class="info">
+                <h3>🛠️ Security Debugging Checklist:</h3>
+                <ul>
+                    <li>✅ Check Security tab for certificate issues</li>
+                    <li>✅ Monitor Console for CSP violations</li>
+                    <li>✅ Verify all resources load over HTTPS</li>
+                    <li>✅ Test input validation and sanitization</li>
+                    <li>✅ Audit localStorage/sessionStorage usage</li>
+                    <li>✅ Check for exposed sensitive data</li>
+                    <li>✅ Validate CORS policies</li>
+                    <li>✅ Test authentication flows</li>
+                </ul>
+            </div>
         </div>
 
         <script>
-            // Simulate insecure request for learning purposes
-            fetch("http://insecure-api.example.com/data").catch((err) =>
-                console.warn("Blocked insecure request:", err)
-            );
+            // Security logging function
+            function logSecurity(message, type = "info") {
+                const logs = document.getElementById("securityLogs");
+                const timestamp = new Date().toISOString();
+                const logEntry = `[${timestamp}] ${type.toUpperCase()}: ${message}\n`;
+                logs.textContent += logEntry;
+                console.log(`🔒 Security: ${message}`);
+            }
+
+            // 1. XSS Vulnerabilities
+            function displayUserInput() {
+                const input = document.getElementById("userInput").value;
+                const output = document.getElementById("output");
+
+                // VULNERABLE: Direct HTML injection
+                output.innerHTML = `<p>You entered: ${input}</p>`;
+
+                logSecurity(
+                    `XSS vulnerability: Directly injecting user input: ${input}`,
+                    "warning"
+                );
+            }
+
+            function injectHTML() {
+                const htmlInput = document.getElementById("htmlInput").value;
+                const output = document.getElementById("htmlOutput");
+
+                // VULNERABLE: innerHTML with user content
+                output.innerHTML = htmlInput;
+
+                logSecurity(
+                    `HTML injection vulnerability: ${htmlInput.substring(
+                        0,
+                        50
+                    )}...`,
+                    "warning"
+                );
+            }
+
+            // 2. CSP Violations
+            function executeInlineScript() {
+                const results = document.getElementById("cspResults");
+
+                try {
+                    // This should trigger CSP violation
+                    const script = document.createElement("script");
+                    script.innerHTML = `
+                    document.getElementById('cspResults').innerHTML = 
+                    '<span style="color: red;">Inline script executed! CSP violation!</span>';
+                `;
+                    document.head.appendChild(script);
+
+                    logSecurity(
+                        "Inline script execution attempted - should trigger CSP violation",
+                        "error"
+                    );
+                } catch (error) {
+                    results.innerHTML = `<span style="color: green;">CSP blocked inline script: ${error.message}</span>`;
+                    logSecurity(
+                        `CSP violation blocked: ${error.message}`,
+                        "info"
+                    );
+                }
+            }
+
+            function dangerousEval() {
+                const input = document.getElementById("evalInput").value;
+                const results = document.getElementById("evalResults");
+
+                try {
+                    // DANGEROUS: Using eval with user input
+                    const result = eval(input);
+                    results.innerHTML = `<span style="color: red;">eval() result: ${result}</span>`;
+                    logSecurity(`Dangerous eval() executed: ${input}`, "error");
+                } catch (error) {
+                    results.innerHTML = `<span style="color: orange;">eval() error: ${error.message}</span>`;
+                    logSecurity(`eval() failed: ${error.message}`, "warning");
+                }
+            }
+
+            // 3. Mixed Content
+            function loadMixedContent() {
+                const area = document.getElementById("mixedContentArea");
+
+                // Try to load HTTP content (will likely be blocked)
+                const img = document.createElement("img");
+                img.src = "http://placekitten.com/200/200";
+                img.onerror = function () {
+                    area.innerHTML =
+                        '<span style="color: orange;">❌ HTTP image blocked by browser security</span>';
+                    logSecurity(
+                        "Mixed content blocked - HTTP image on HTTPS page",
+                        "warning"
+                    );
+                };
+                img.onload = function () {
+                    area.innerHTML =
+                        '<span style="color: red;">⚠️ HTTP image loaded - security issue!</span>';
+                    logSecurity(
+                        "Mixed content security issue - HTTP image loaded",
+                        "error"
+                    );
+                };
+
+                area.appendChild(img);
+            }
+
+            // 4. Insecure Storage
+            function storeSensitiveData() {
+                const data = document.getElementById("sensitiveData").value;
+
+                // INSECURE: Storing sensitive data in localStorage
+                localStorage.setItem("sensitiveInfo", data);
+                localStorage.setItem("userToken", "fake-jwt-token-123");
+                localStorage.setItem("password", "plaintext-password");
+
+                logSecurity(
+                    `Insecure storage: Sensitive data stored in localStorage: ${data}`,
+                    "error"
+                );
+
+                document.getElementById("storageResults").innerHTML =
+                    '<span style="color: red;">⚠️ Sensitive data stored insecurely in localStorage!</span>';
+            }
+
+            function displayStoredData() {
+                const stored = localStorage.getItem("sensitiveInfo");
+                const token = localStorage.getItem("userToken");
+                const password = localStorage.getItem("password");
+
+                document.getElementById("storageResults").innerHTML = `
+                <div style="color: red;">
+                    <p><strong>Exposed Data:</strong></p>
+                    <p>Sensitive Info: ${stored}</p>
+                    <p>Token: ${token}</p>
+                    <p>Password: ${password}</p>
+                </div>
+            `;
+
+                logSecurity(
+                    "Sensitive data retrieved from localStorage - security exposure",
+                    "error"
+                );
+            }
+
+            // 5. Insecure Requests
+            function makeInsecureRequest() {
+                const results = document.getElementById("apiResults");
+
+                // Attempt HTTP request (will likely fail due to mixed content policy)
+                fetch("http://httpbin.org/json")
+                    .then((response) => {
+                        results.innerHTML =
+                            '<span style="color: red;">⚠️ HTTP request succeeded - security issue!</span>';
+                        logSecurity("Insecure HTTP request succeeded", "error");
+                    })
+                    .catch((error) => {
+                        results.innerHTML = `<span style="color: orange;">❌ HTTP request blocked: ${error.message}</span>`;
+                        logSecurity(
+                            `HTTP request blocked by security policy: ${error.message}`,
+                            "info"
+                        );
+                    });
+            }
+
+            // Monitor for CSP violations
+            document.addEventListener("securitypolicyviolation", function (e) {
+                logSecurity(
+                    `CSP Violation: ${e.violatedDirective} - ${e.blockedURI}`,
+                    "error"
+                );
+            });
+
+            // Monitor for unhandled errors that might indicate security issues
+            window.addEventListener("error", function (e) {
+                logSecurity(
+                    `JavaScript Error: ${e.message} at ${e.filename}:${e.lineno}`,
+                    "warning"
+                );
+            });
+
+            // Initialize security monitoring
+            window.addEventListener("load", function () {
+                logSecurity("Security debugging session started", "info");
+
+                // Check if page is loaded over HTTPS
+                if (location.protocol !== "https:") {
+                    logSecurity(
+                        "Page loaded over HTTP - security risk",
+                        "warning"
+                    );
+                }
+
+                // Check for existing sensitive data in storage
+                if (localStorage.length > 0) {
+                    logSecurity(
+                        `Found ${localStorage.length} items in localStorage - review for sensitive data`,
+                        "info"
+                    );
+                }
+            });
+
+            // Simulate some security events for demonstration
+            setTimeout(() => {
+                logSecurity(
+                    "Simulated: Suspicious login attempt detected",
+                    "warning"
+                );
+            }, 2000);
+
+            setTimeout(() => {
+                logSecurity(
+                    "Simulated: Rate limiting triggered for API endpoint",
+                    "info"
+                );
+            }, 4000);
         </script>
     </body>
 </html>

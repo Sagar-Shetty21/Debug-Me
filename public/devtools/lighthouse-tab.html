@@ -1,84 +1,1229 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <title>Lighthouse Tab - Debug-Me</title>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                margin: 2rem;
-                background-color: #f9fafb;
-                color: #111827;
-            }
-            h1 {
-                color: #2563eb;
-            }
-            .card {
-                background: white;
-                padding: 1.5rem;
-                margin-bottom: 1rem;
-                border-radius: 8px;
-                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-            }
-            .score {
-                font-size: 1.5rem;
-                font-weight: bold;
-                margin: 0.5rem 0;
-            }
-            .good {
-                color: #16a34a;
-            }
-            .average {
-                color: #ca8a04;
-            }
-            .poor {
-                color: #dc2626;
-            }
-        </style>
-    </head>
-    <body>
-        <h1>🚀 Lighthouse Tab Debugging</h1>
-        <p>
-            The <strong>Lighthouse Tab</strong> in Chrome DevTools is used to
-            audit your web app’s performance, accessibility, SEO, and best
-            practices. It generates a report with scores and recommendations.
-        </p>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lighthouse Audits - JavaScript Debugging</title>
+    <meta name="description" content="A comprehensive guide to Lighthouse audits for JavaScript debugging and web performance optimization">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔍</text></svg>">
+    
+    <!-- Performance Issues - Large CSS -->
+    <style>
+        /* Intentionally large CSS for performance testing */
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --accent-color: #3b82f6;
+            --background-color: #f8fafc;
+            --text-color: #1e293b;
+            --border-color: #e2e8f0;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+        }
 
-        <div class="card">
-            <h2>📊 Example Audit Results</h2>
-            <p class="score good">Performance: 92</p>
-            <p class="score average">Accessibility: 74</p>
-            <p class="score good">Best Practices: 88</p>
-            <p class="score poor">SEO: 45</p>
-        </div>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-        <div class="card">
-            <h2>🛠 Common Recommendations</h2>
-            <ul>
-                <li>Optimize and compress images for faster load time.</li>
-                <li>Use proper ARIA roles for accessibility.</li>
-                <li>Serve assets over HTTPS only.</li>
-                <li>Add descriptive meta tags for SEO.</li>
-            </ul>
-        </div>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background: linear-gradient(135deg, var(--background-color) 0%, #e2e8f0 100%);
+            min-height: 100vh;
+        }
 
-        <div class="card">
-            <h2>🔍 Exercises</h2>
-            <ul>
-                <li>Open DevTools → Lighthouse tab.</li>
-                <li>Run an audit for Performance, Accessibility, and SEO.</li>
-                <li>Compare your results with the sample report above.</li>
-                <li>
-                    Implement at least one recommended fix and rerun the audit.
-                </li>
-            </ul>
-        </div>
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
 
-        <script>
-            // Simulate slow resource for Lighthouse testing
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .section {
+            background: white;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .section h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+        }
+
+        .section h3 {
+            color: var(--secondary-color);
+            margin: 1.5rem 0 1rem 0;
+            font-size: 1.3rem;
+        }
+
+        .code-block {
+            background: #f1f5f9;
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            border-left: 3px solid var(--accent-color);
+            overflow-x: auto;
+        }
+
+        .audit-item {
+            background: #f8fafc;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+        }
+
+        .audit-score {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-left: 1rem;
+        }
+
+        .score-good { background: var(--success-color); color: white; }
+        .score-needs-improvement { background: var(--warning-color); color: white; }
+        .score-poor { background: var(--error-color); color: white; }
+
+        .button {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0.5rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .button:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+
+        .performance-issues {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 1rem 0;
+        }
+
+        .large-image {
+            width: 100%;
+            max-width: 800px;
+            height: auto;
+            margin: 1rem 0;
+        }
+
+        /* Intentionally inefficient animations */
+        .spinning-element {
+            animation: inefficient-spin 2s linear infinite;
+            width: 50px;
+            height: 50px;
+            background: var(--primary-color);
+            margin: 1rem;
+            display: inline-block;
+        }
+
+        @keyframes inefficient-spin {
+            from { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(90deg) scale(1.1); }
+            50% { transform: rotate(180deg) scale(1); }
+            75% { transform: rotate(270deg) scale(0.9); }
+            to { transform: rotate(360deg) scale(1); }
+        }
+
+        /* Large unused styles */
+        .unused-style-1, .unused-style-2, .unused-style-3 {
+            background: #ff0000;
+            padding: 100px;
+            margin: 50px;
+            border: 10px solid #00ff00;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🔍 Lighthouse Audits & Performance Debugging</h1>
+            <p>Learn how to use Google Lighthouse for comprehensive web performance audits and debugging</p>
+        </header>
+
+        <section class="section">
+            <h2>🎯 What is Lighthouse?</h2>
+            <p>Google Lighthouse is an open-source, automated tool for improving the quality of web pages. It audits performance, accessibility, progressive web apps, SEO, and more.</p>
+            
+            <div class="code-block">
+// Ways to run Lighthouse:
+// 1. Chrome DevTools (Lighthouse tab)
+// 2. Chrome Extension
+// 3. Command Line Interface
+// 4. Node.js module
+// 5. Continuous Integration
+
+npm install -g lighthouse
+lighthouse https://example.com --view
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>📊 Core Web Vitals</h2>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h3>LCP</h3>
+                    <div class="metric-value score-poor">3.2s</div>
+                    <p>Largest Contentful Paint</p>
+                </div>
+                <div class="metric-card">
+                    <h3>FID</h3>
+                    <div class="metric-value score-good">45ms</div>
+                    <p>First Input Delay</p>
+                </div>
+                <div class="metric-card">
+                    <h3>CLS</h3>
+                    <div class="metric-value score-needs-improvement">0.15</div>
+                    <p>Cumulative Layout Shift</p>
+                </div>
+            </div>
+
+            <h3>🔧 Debugging Core Web Vitals</h3>
+            <div class="code-block">
+// Monitor Core Web Vitals in JavaScript
+function measureWebVitals() {
+    // Largest Contentful Paint
+    new PerformanceObserver((entryList) => {
+        for (const entry of entryList.getEntries()) {
+            console.log('LCP:', entry.startTime);
+        }
+    }).observe({type: 'largest-contentful-paint', buffered: true});
+
+    // First Input Delay
+    new PerformanceObserver((entryList) => {
+        for (const entry of entryList.getEntries()) {
+            console.log('FID:', entry.processingStart - entry.startTime);
+        }
+    }).observe({type: 'first-input', buffered: true});
+
+    // Cumulative Layout Shift
+    new PerformanceObserver((entryList) => {
+        let cumulativeScore = 0;
+        for (const entry of entryList.getEntries()) {
+            if (!entry.hadRecentInput) {
+                cumulativeScore += entry.value;
+            }
+        }
+        console.log('CLS:', cumulativeScore);
+    }).observe({type: 'layout-shift', buffered: true});
+}
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>🚀 Performance Audits</h2>
+            
+            <div class="audit-item">
+                <strong>First Contentful Paint</strong>
+                <span class="audit-score score-poor">Poor (4.2s)</span>
+                <p>The time when the first text or image is painted</p>
+            </div>
+
+            <div class="audit-item">
+                <strong>Speed Index</strong>
+                <span class="audit-score score-needs-improvement">Needs Improvement (5.1s)</span>
+                <p>How quickly the contents of a page are visibly populated</p>
+            </div>
+
+            <div class="audit-item">
+                <strong>Time to Interactive</strong>
+                <span class="audit-score score-poor">Poor (8.7s)</span>
+                <p>The time it takes for the page to become fully interactive</p>
+            </div>
+
+            <h3>🔍 Performance Debugging Techniques</h3>
+            <div class="code-block">
+// Performance measurement utilities
+class PerformanceDebugger {
+    static measureFunction(fn, name) {
+        const start = performance.now();
+        const result = fn();
+        const end = performance.now();
+        console.log(`${name} took ${end - start} milliseconds`);
+        return result;
+    }
+
+    static measureAsync(asyncFn, name) {
+        return async (...args) => {
+            const start = performance.now();
+            const result = await asyncFn(...args);
+            const end = performance.now();
+            console.log(`${name} took ${end - start} milliseconds`);
+            return result;
+        };
+    }
+
+    static logResourceTiming() {
+        const resources = performance.getEntriesByType('resource');
+        resources.forEach(resource => {
+            console.log(`${resource.name}: ${resource.duration}ms`);
+        });
+    }
+}
+            </div>
+
+            <button class="button" onclick="runPerformanceTests()">Run Performance Tests</button>
+            <button class="button" onclick="simulateSlowOperation()">Simulate Slow Operation</button>
+            <button class="button" onclick="triggerMemoryLeak()">Trigger Memory Leak</button>
+        </section>
+
+        <section class="section">
+            <h2>♿ Accessibility Audits</h2>
+            
+            <div class="audit-item">
+                <strong>Color Contrast</strong>
+                <span class="audit-score score-needs-improvement">Needs Improvement</span>
+                <p>Background and foreground colors have insufficient contrast ratio</p>
+            </div>
+
+            <div class="audit-item">
+                <strong>Image Alt Text</strong>
+                <span class="audit-score score-poor">Poor</span>
+                <p>Images do not have alt attributes</p>
+            </div>
+
+            <!-- Accessibility Issues Examples -->
+            <h3>🔧 Accessibility Testing Elements</h3>
+            
+            <!-- Missing alt text (bad) -->
+            <img src="https://via.placeholder.com/300x200/ff6b6b/ffffff?text=No+Alt+Text" class="large-image">
+            
+            <!-- Good alt text -->
+            <img src="https://via.placeholder.com/300x200/4ecdc4/ffffff?text=Good+Alt+Text" 
+                 alt="Placeholder image demonstrating proper alt text usage" class="large-image">
+
+            <!-- Poor color contrast -->
+            <div style="background: #ffff00; color: #ffffff; padding: 1rem; margin: 1rem 0;">
+                This text has poor color contrast (yellow background, white text)
+            </div>
+
+            <!-- Missing form labels -->
+            <input type="text" placeholder="Input without label">
+            
+            <!-- Proper form labels -->
+            <label for="proper-input">Properly labeled input:</label>
+            <input type="text" id="proper-input" name="proper-input">
+
+            <div class="code-block">
+// Accessibility debugging utilities
+class AccessibilityDebugger {
+    static checkColorContrast(element) {
+        const styles = getComputedStyle(element);
+        const bgColor = styles.backgroundColor;
+        const textColor = styles.color;
+        console.log(`Background: ${bgColor}, Text: ${textColor}`);
+        // Color contrast calculation would go here
+    }
+
+    static findMissingAltTexts() {
+        const images = document.querySelectorAll('img');
+        const missingAlt = [];
+        
+        images.forEach((img, index) => {
+            if (!img.alt || img.alt.trim() === '') {
+                missingAlt.push({index, src: img.src});
+            }
+        });
+        
+        console.log('Images missing alt text:', missingAlt);
+        return missingAlt;
+    }
+
+    static checkFormLabels() {
+        const inputs = document.querySelectorAll('input, select, textarea');
+        const unlabeled = [];
+        
+        inputs.forEach(input => {
+            const hasLabel = input.labels && input.labels.length > 0;
+            const hasAriaLabel = input.hasAttribute('aria-label');
+            const hasAriaLabelledby = input.hasAttribute('aria-labelledby');
+            
+            if (!hasLabel && !hasAriaLabel && !hasAriaLabelledby) {
+                unlabeled.push(input);
+            }
+        });
+        
+        console.log('Unlabeled form controls:', unlabeled);
+        return unlabeled;
+    }
+}
+            </div>
+
+            <button class="button" onclick="checkAccessibility()">Check Accessibility Issues</button>
+        </section>
+
+        <section class="section">
+            <h2>🔧 Best Practices Audits</h2>
+            
+            <div class="audit-item">
+                <strong>Uses HTTPS</strong>
+                <span class="audit-score score-good">Good</span>
+                <p>All requests are served over HTTPS</p>
+            </div>
+
+            <div class="audit-item">
+                <strong>Avoids Console Errors</strong>
+                <span class="audit-score score-poor">Poor</span>
+                <p>Console contains error messages</p>
+            </div>
+
+            <div class="audit-item">
+                <strong>Uses Passive Event Listeners</strong>
+                <span class="audit-score score-needs-improvement">Needs Improvement</span>
+                <p>Consider marking touch and wheel event listeners as passive</p>
+            </div>
+
+            <div class="code-block">
+// Best practices debugging
+class BestPracticesDebugger {
+    static checkConsoleErrors() {
+        // Override console methods to track errors
+        const originalError = console.error;
+        const errors = [];
+        
+        console.error = (...args) => {
+            errors.push({
+                timestamp: Date.now(),
+                message: args.join(' '),
+                stack: new Error().stack
+            });
+            originalError.apply(console, args);
+        };
+        
+        return errors;
+    }
+
+    static checkEventListeners() {
+        const elements = document.querySelectorAll('*');
+        const eventListeners = [];
+        
+        elements.forEach(element => {
+            const listeners = getEventListeners(element); // Chrome DevTools only
+            if (listeners) {
+                eventListeners.push({element, listeners});
+            }
+        });
+        
+        return eventListeners;
+    }
+
+    static checkHTTPS() {
+        return {
+            isHTTPS: location.protocol === 'https:',
+            mixedContent: this.findMixedContent()
+        };
+    }
+
+    static findMixedContent() {
+        const resources = performance.getEntriesByType('resource');
+        return resources.filter(resource => 
+            resource.name.startsWith('http:') && location.protocol === 'https:'
+        );
+    }
+}
+            </div>
+
+            <button class="button" onclick="generateConsoleErrors()">Generate Console Errors</button>
+            <button class="button" onclick="checkBestPractices()">Check Best Practices</button>
+        </section>
+
+        <section class="section">
+            <h2>📱 Progressive Web App Audits</h2>
+            
+            <div class="audit-item">
+                <strong>Web App Manifest</strong>
+                <span class="audit-score score-poor">Poor</span>
+                <p>Does not provide a valid web app manifest</p>
+            </div>
+
+            <div class="audit-item">
+                <strong>Service Worker</strong>
+                <span class="audit-score score-poor">Poor</span>
+                <p>Does not register a service worker</p>
+            </div>
+
+            <div class="audit-item">
+                <strong>Installable</strong>
+                <span class="audit-score score-poor">Poor</span>
+                <p>Page is not installable</p>
+            </div>
+
+            <div class="code-block">
+// PWA debugging utilities
+class PWADebugger {
+    static checkManifest() {
+        const manifestLink = document.querySelector('link[rel="manifest"]');
+        if (!manifestLink) {
+            console.error('No web app manifest found');
+            return null;
+        }
+        
+        fetch(manifestLink.href)
+            .then(response => response.json())
+            .then(manifest => {
+                console.log('Web App Manifest:', manifest);
+                this.validateManifest(manifest);
+            })
+            .catch(error => console.error('Error loading manifest:', error));
+    }
+
+    static validateManifest(manifest) {
+        const required = ['name', 'short_name', 'start_url', 'display', 'icons'];
+        const missing = required.filter(prop => !manifest[prop]);
+        
+        if (missing.length > 0) {
+            console.warn('Missing required manifest properties:', missing);
+        }
+    }
+
+    static checkServiceWorker() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations()
+                .then(registrations => {
+                    console.log('Service Worker registrations:', registrations);
+                    if (registrations.length === 0) {
+                        console.warn('No service worker registered');
+                    }
+                });
+        } else {
+            console.error('Service Worker not supported');
+        }
+    }
+
+    static checkInstallability() {
+        let deferredPrompt;
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            console.log('App is installable');
+        });
+        
+        window.addEventListener('appinstalled', (evt) => {
+            console.log('App was installed');
+        });
+    }
+}
+            </div>
+
+            <button class="button" onclick="checkPWAFeatures()">Check PWA Features</button>
+        </section>
+
+        <section class="section">
+            <h2>🔍 SEO Audits</h2>
+            
+            <div class="audit-item">
+                <strong>Meta Description</strong>
+                <span class="audit-score score-good">Good</span>
+                <p>Document has a meta description</p>
+            </div>
+
+            <div class="audit-item">
+                <strong>Heading Order</strong>
+                <span class="audit-score score-needs-improvement">Needs Improvement</span>
+                <p>Heading elements are not in a sequentially-descending order</p>
+            </div>
+
+            <!-- SEO Issues Examples -->
+            <h5>This is an H5 without proper heading hierarchy</h5>
+            <h2>This H2 comes after H5 (bad practice)</h2>
+
+            <div class="code-block">
+// SEO debugging utilities
+class SEODebugger {
+    static checkMetaTags() {
+        const metaTags = {
+            title: document.title,
+            description: document.querySelector('meta[name="description"]')?.content,
+            keywords: document.querySelector('meta[name="keywords"]')?.content,
+            viewport: document.querySelector('meta[name="viewport"]')?.content,
+            canonical: document.querySelector('link[rel="canonical"]')?.href
+        };
+        
+        console.log('Meta tags:', metaTags);
+        
+        if (!metaTags.description) {
+            console.warn('Missing meta description');
+        }
+        if (!metaTags.title || metaTags.title.length > 60) {
+            console.warn('Title tag issues');
+        }
+    }
+
+    static checkHeadingStructure() {
+        const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+        const structure = [];
+        
+        headings.forEach(heading => {
+            const level = parseInt(heading.tagName.charAt(1));
+            structure.push({
+                level,
+                text: heading.textContent.trim(),
+                element: heading
+            });
+        });
+        
+        // Check for proper nesting
+        let issues = [];
+        for (let i = 1; i < structure.length; i++) {
+            const prevLevel = structure[i-1].level;
+            const currentLevel = structure[i].level;
+            
+            if (currentLevel > prevLevel + 1) {
+                issues.push(`Heading level jump from H${prevLevel} to H${currentLevel}`);
+            }
+        }
+        
+        console.log('Heading structure:', structure);
+        if (issues.length > 0) {
+            console.warn('Heading structure issues:', issues);
+        }
+    }
+
+    static checkImageSEO() {
+        const images = document.querySelectorAll('img');
+        const issues = [];
+        
+        images.forEach((img, index) => {
+            if (!img.alt) {
+                issues.push(`Image ${index + 1}: Missing alt attribute`);
+            }
+            if (!img.src || img.src.includes('data:')) {
+                issues.push(`Image ${index + 1}: Invalid src`);
+            }
+        });
+        
+        console.log('Image SEO issues:', issues);
+    }
+}
+            </div>
+
+            <button class="button" onclick="checkSEOIssues()">Check SEO Issues</button>
+        </section>
+
+        <section class="section">
+            <h2>🛠️ Custom Lighthouse Audits</h2>
+            
+            <div class="code-block">
+// Creating custom Lighthouse audits
+const customAudit = {
+    id: 'custom-performance-audit',
+    title: 'Custom Performance Check',
+    failureTitle: 'Custom performance check failed',
+    description: 'Checks for specific performance issues in your application',
+    
+    audit: function(artifacts, context) {
+        // Custom audit logic
+        const performanceScore = this.calculateCustomScore();
+        
+        return {
+            score: performanceScore > 0.8 ? 1 : 0,
+            displayValue: `Score: ${Math.round(performanceScore * 100)}`,
+            details: {
+                type: 'list',
+                items: this.getPerformanceIssues()
+            }
+        };
+    },
+    
+    calculateCustomScore: function() {
+        // Custom scoring logic
+        const metrics = performance.getEntriesByType('navigation')[0];
+        const loadTime = metrics.loadEventEnd - metrics.navigationStart;
+        return Math.max(0, 1 - (loadTime / 5000)); // 5 second baseline
+    },
+    
+    getPerformanceIssues: function() {
+        // Return array of performance issues found
+        return [
+            { text: 'Large bundle size detected' },
+            { text: 'Unused CSS found' },
+            { text: 'Non-optimized images' }
+        ];
+    }
+};
+
+// Running custom audits programmatically
+class CustomLighthouseAudits {
+    static async runCustomAudits() {
+        const audits = [
+            this.auditBundleSize(),
+            this.auditThirdPartyScripts(),
+            this.auditCachingStrategy(),
+            this.auditImageOptimization()
+        ];
+        
+        const results = await Promise.all(audits);
+        console.log('Custom audit results:', results);
+        return results;
+    }
+    
+    static async auditBundleSize() {
+        const resources = performance.getEntriesByType('resource');
+        const jsResources = resources.filter(r => r.name.includes('.js'));
+        const totalSize = jsResources.reduce((sum, r) => sum + r.transferSize, 0);
+        
+        return {
+            audit: 'Bundle Size',
+            score: totalSize < 500000 ? 'good' : totalSize < 1000000 ? 'warning' : 'poor',
+            value: `${Math.round(totalSize / 1024)}KB`,
+            recommendation: totalSize > 500000 ? 'Consider code splitting' : null
+        };
+    }
+    
+    static async auditThirdPartyScripts() {
+        const scripts = document.querySelectorAll('script[src]');
+        const thirdParty = Array.from(scripts).filter(script => {
+            const url = new URL(script.src);
+            return url.origin !== location.origin;
+        });
+        
+        return {
+            audit: 'Third-party Scripts',
+            score: thirdParty.length < 3 ? 'good' : thirdParty.length < 7 ? 'warning' : 'poor',
+            value: `${thirdParty.length} external scripts`,
+            recommendation: thirdParty.length > 5 ? 'Reduce third-party dependencies' : null
+        };
+    }
+}
+            </div>
+
+            <button class="button" onclick="runCustomAudits()">Run Custom Audits</button>
+        </section>
+
+        <!-- Performance Issues Section -->
+        <section class="section performance-issues">
+            <h2>⚠️ Intentional Performance Issues (for testing)</h2>
+            <p>This section contains intentional performance issues to test Lighthouse audits:</p>
+            
+            <!-- Large, unoptimized images -->
+            <img src="https://via.placeholder.com/2000x1500/ff6b6b/ffffff?text=Large+Unoptimized+Image" 
+                 class="large-image" alt="Large unoptimized placeholder image">
+            
+            <!-- Inefficient animations -->
+            <div class="spinning-element"></div>
+            <div class="spinning-element"></div>
+            <div class="spinning-element"></div>
+            
+            <!-- Memory leak trigger -->
+            <div id="memory-leak-container"></div>
+            
+            <button class="button" onclick="createMemoryLeak()">Create Memory Leak</button>
+            <button class="button" onclick="blockMainThread()">Block Main Thread</button>
+        </section>
+    </div>
+
+    <!-- Multiple external scripts (performance impact) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+    
+    <script>
+        // Global variables for debugging
+        let memoryLeakArray = [];
+        let performanceData = {};
+
+        // Performance testing functions
+        function runPerformanceTests() {
+            console.group('🚀 Performance Tests');
+            
+            // Test 1: Resource timing
+            PerformanceDebugger.logResourceTiming();
+            
+            // Test 2: Memory usage (Chrome only)
+            if (performance.memory) {
+                console.log('Memory usage:', {
+                    used: Math.round(performance.memory.usedJSHeapSize / 1024 / 1024) + ' MB',
+                    total: Math.round(performance.memory.totalJSHeapSize / 1024 / 1024) + ' MB',
+                    limit: Math.round(performance.memory.jsHeapSizeLimit / 1024 / 1024) + ' MB'
+                });
+            }
+            
+            // Test 3: Network timing
+            const navigation = performance.getEntriesByType('navigation')[0];
+            console.log('Page load timing:', {
+                dns: navigation.domainLookupEnd - navigation.domainLookupStart,
+                tcp: navigation.connectEnd - navigation.connectStart,
+                request: navigation.responseStart - navigation.requestStart,
+                response: navigation.responseEnd - navigation.responseStart,
+                domProcessing: navigation.domContentLoadedEventStart - navigation.responseEnd,
+                total: navigation.loadEventEnd - navigation.navigationStart
+            });
+            
+            console.groupEnd();
+        }
+
+        function simulateSlowOperation() {
+            console.log('⏳ Starting slow operation...');
+            const start = performance.now();
+            
+            // Intentionally slow synchronous operation
+            let result = 0;
+            for (let i = 0; i < 10000000; i++) {
+                result += Math.random();
+            }
+            
+            const end = performance.now();
+            console.log(`🐌 Slow operation completed in ${end - start}ms`);
+        }
+
+        function triggerMemoryLeak() {
+            console.log('💧 Creating memory leak...');
+            
+            // Create large objects that won't be garbage collected
+            for (let i = 0; i < 1000; i++) {
+                memoryLeakArray.push({
+                    data: new Array(10000).fill('memory leak data'),
+                    timestamp: Date.now(),
+                    index: i
+                });
+            }
+            
+            console.log(`Memory leak array size: ${memoryLeakArray.length}`);
+        }
+
+        // Accessibility testing functions
+        function checkAccessibility() {
+            console.group('♿ Accessibility Check');
+            
+            // Check missing alt texts
+            const missingAlt = AccessibilityDebugger.findMissingAltTexts();
+            console.log(`Found ${missingAlt.length} images without alt text`);
+            
+            // Check form labels
+            const unlabeledInputs = AccessibilityDebugger.checkFormLabels();
+            console.log(`Found ${unlabeledInputs.length} unlabeled form controls`);
+            
+            // Check color contrast (basic check)
+            const elementsWithBadContrast = document.querySelectorAll('[style*="background"]');
+            elementsWithBadContrast.forEach(element => {
+                AccessibilityDebugger.checkColorContrast(element);
+            });
+            
+            console.groupEnd();
+        }
+
+        // Best practices testing functions
+        function generateConsoleErrors() {
+            console.group('🚨 Generating Console Errors (for testing)');
+            
+            // Generate various types of console errors
+            console.error('Test error: This is a sample error message');
+            console.warn('Test warning: This is a sample warning');
+            
+            try {
+                // Intentional error
+                undefinedFunction();
+            } catch (error) {
+                console.error('Caught error:', error.message);
+            }
+            
+            // Network error simulation
+            fetch('/nonexistent-endpoint')
+                .catch(error => console.error('Network error:', error));
+            
+            console.groupEnd();
+        }
+
+        function checkBestPractices() {
+            console.group('✅ Best Practices Check');
+            
+            // Check HTTPS
+            const httpsCheck = BestPracticesDebugger.checkHTTPS();
+            console.log('HTTPS status:', httpsCheck);
+            
+            // Check for mixed content
+            const mixedContent = BestPracticesDebugger.findMixedContent();
+            if (mixedContent.length > 0) {
+                console.warn('Mixed content found:', mixedContent);
+            }
+            
+            // Check for passive event listeners
+            const passiveEvents = ['touchstart', 'touchmove', 'wheel', 'mousewheel'];
+            passiveEvents.forEach(eventType => {
+                document.addEventListener(eventType, function(e) {
+                    console.log(`Non-passive ${eventType} listener detected`);
+                }, false); // Non-passive listener (bad practice)
+            });
+            
+            console.groupEnd();
+        }
+
+        // PWA testing functions
+        function checkPWAFeatures() {
+            console.group('📱 PWA Features Check');
+            
+            // Check manifest
+            PWADebugger.checkManifest();
+            
+            // Check service worker
+            PWADebugger.checkServiceWorker();
+            
+            // Check installability
+            PWADebugger.checkInstallability();
+            
+            // Check offline capability
+            if ('navigator' in window && 'onLine' in navigator) {
+                console.log('Online status:', navigator.onLine);
+                
+                window.addEventListener('offline', () => {
+                    console.log('App went offline');
+                });
+                
+                window.addEventListener('online', () => {
+                    console.log('App came online');
+                });
+            }
+            
+            console.groupEnd();
+        }
+
+        // SEO testing functions
+        function checkSEOIssues() {
+            console.group('🔍 SEO Issues Check');
+            
+            // Check meta tags
+            SEODebugger.checkMetaTags();
+            
+            // Check heading structure
+            SEODebugger.checkHeadingStructure();
+            
+            // Check image SEO
+            SEODebugger.checkImageSEO();
+            
+            // Check internal links
+            const internalLinks = document.querySelectorAll('a[href^="/"], a[href^="#"]');
+            console.log(`Found ${internalLinks.length} internal links`);
+            
+            // Check external links
+            const externalLinks = document.querySelectorAll('a[href^="http"]:not([href*="' + location.hostname + '"])');
+            const externalLinksWithoutNoopener = Array.from(externalLinks).filter(link => 
+                !link.rel.includes('noopener') && !link.rel.includes('noreferrer')
+            );
+            
+            if (externalLinksWithoutNoopener.length > 0) {
+                console.warn('External links without rel="noopener":', externalLinksWithoutNoopener);
+            }
+            
+            console.groupEnd();
+        }
+
+        // Custom audit functions
+        function runCustomAudits() {
+            console.group('🛠️ Custom Lighthouse Audits');
+            
+            CustomLighthouseAudits.runCustomAudits().then(results => {
+                results.forEach(result => {
+                    const icon = result.score === 'good' ? '✅' : 
+                                result.score === 'warning' ? '⚠️' : '❌';
+                    console.log(`${icon} ${result.audit}: ${result.value}`);
+                    
+                    if (result.recommendation) {
+                        console.log(`   💡 ${result.recommendation}`);
+                    }
+                });
+            });
+            
+            console.groupEnd();
+        }
+
+        // Memory leak and performance impact functions
+        function createMemoryLeak() {
+            console.log('💧 Creating intentional memory leak...');
+            
+            const container = document.getElementById('memory-leak-container');
+            
+            // Create DOM elements that reference each other (circular references)
+            for (let i = 0; i < 100; i++) {
+                const div = document.createElement('div');
+                div.innerHTML = `<p>Memory leak element ${i}</p>`;
+                
+                // Create circular reference
+                div.customProperty = {
+                    element: div,
+                    data: new Array(1000).fill(`leak-${i}`)
+                };
+                
+                container.appendChild(div);
+            }
+            
+            // Create global references that won't be cleaned up
+            window.leakData = window.leakData || [];
+            window.leakData.push({
+                timestamp: Date.now(),
+                data: new Array(10000).fill('persistent leak data')
+            });
+            
+            console.log('Memory leak created. Check memory usage in DevTools.');
+        }
+
+        function blockMainThread() {
+            console.log('🚫 Blocking main thread for 3 seconds...');
+            
+            const start = Date.now();
+            while (Date.now() - start < 3000) {
+                // Intentionally block the main thread
+                Math.random();
+            }
+            
+            console.log('Main thread unblocked');
+        }
+
+        // Lighthouse CLI integration helper
+        function generateLighthouseReport() {
+            console.group('📊 Lighthouse Report Generation');
+            console.log('To generate a Lighthouse report for this page, run:');
+            console.log(`lighthouse ${window.location.href} --view --output html`);
+            console.log('');
+            console.log('For CI integration:');
+            console.log(`lighthouse ${window.location.href} --output json --output-path ./lighthouse-report.json`);
+            console.log('');
+            console.log('With specific audits:');
+            console.log(`lighthouse ${window.location.href} --only-categories=performance,accessibility --view`);
+            console.groupEnd();
+        }
+
+        // Performance monitoring setup
+        function setupPerformanceMonitoring() {
+            // Monitor long tasks (Chrome only)
+            if ('PerformanceObserver' in window) {
+                try {
+                    const observer = new PerformanceObserver((list) => {
+                        list.getEntries().forEach((entry) => {
+                            if (entry.duration > 50) { // Tasks longer than 50ms
+                                console.warn(`Long task detected: ${entry.duration}ms`);
+                            }
+                        });
+                    });
+                    observer.observe({entryTypes: ['longtask']});
+                } catch (e) {
+                    console.log('Long task monitoring not supported');
+                }
+
+                // Monitor layout shifts
+                try {
+                    const clsObserver = new PerformanceObserver((list) => {
+                        list.getEntries().forEach((entry) => {
+                            if (!entry.hadRecentInput && entry.value > 0.1) {
+                                console.warn(`Significant layout shift: ${entry.value}`);
+                            }
+                        });
+                    });
+                    clsObserver.observe({entryTypes: ['layout-shift']});
+                } catch (e) {
+                    console.log('Layout shift monitoring not supported');
+                }
+            }
+        }
+
+        // Audit summary generator
+        function generateAuditSummary() {
+            console.group('📋 Lighthouse Audit Summary');
+            
+            const summary = {
+                performance: {
+                    'First Contentful Paint': '4.2s (Poor)',
+                    'Largest Contentful Paint': '3.2s (Poor)', 
+                    'Speed Index': '5.1s (Needs Improvement)',
+                    'Time to Interactive': '8.7s (Poor)',
+                    'First Input Delay': '45ms (Good)',
+                    'Cumulative Layout Shift': '0.15 (Needs Improvement)'
+                },
+                accessibility: {
+                    'Color Contrast': 'Needs Improvement',
+                    'Image Alt Text': 'Poor',
+                    'Form Labels': 'Poor',
+                    'Heading Order': 'Needs Improvement'
+                },
+                bestPractices: {
+                    'Uses HTTPS': 'Good',
+                    'Console Errors': 'Poor',
+                    'Passive Event Listeners': 'Needs Improvement'
+                },
+                seo: {
+                    'Meta Description': 'Good',
+                    'Title Tag': 'Good',
+                    'Heading Structure': 'Needs Improvement',
+                    'Image SEO': 'Poor'
+                },
+                pwa: {
+                    'Web App Manifest': 'Poor',
+                    'Service Worker': 'Poor',
+                    'Installable': 'Poor'
+                }
+            };
+            
+            Object.entries(summary).forEach(([category, audits]) => {
+                console.log(`\n${category.toUpperCase()}:`);
+                Object.entries(audits).forEach(([audit, score]) => {
+                    const icon = score.includes('Good') ? '✅' : 
+                                score.includes('Needs') ? '⚠️' : '❌';
+                    console.log(`  ${icon} ${audit}: ${score}`);
+                });
+            });
+            
+            console.groupEnd();
+        }
+
+        // Initialize debugging tools
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔍 Lighthouse Debugging Tools Loaded');
+            console.log('Available functions:');
+            console.log('- runPerformanceTests()');
+            console.log('- checkAccessibility()');
+            console.log('- checkBestPractices()');
+            console.log('- checkPWAFeatures()');
+            console.log('- checkSEOIssues()');
+            console.log('- runCustomAudits()');
+            console.log('- generateLighthouseReport()');
+            console.log('- generateAuditSummary()');
+            
+            // Setup automatic monitoring
+            setupPerformanceMonitoring();
+            
+            // Generate initial audit summary
             setTimeout(() => {
-                console.log("Simulated delay to test performance audit.");
-            }, 3000);
-        </script>
-    </body>
+                generateAuditSummary();
+            }, 2000);
+        });
+
+        // Expose debugging utilities globally
+        window.LighthouseDebug = {
+            performance: PerformanceDebugger,
+            accessibility: AccessibilityDebugger,
+            bestPractices: BestPracticesDebugger,
+            seo: SEODebugger,
+            pwa: PWADebugger,
+            custom: CustomLighthouseAudits,
+            runAllTests: function() {
+                runPerformanceTests();
+                checkAccessibility();
+                checkBestPractices();
+                checkPWAFeatures();
+                checkSEOIssues();
+                runCustomAudits();
+            }
+        };
+
+        // Service Worker registration (for PWA testing)
+        if ('serviceWorker' in navigator) {
+            // Register a basic service worker for PWA testing
+            const swCode = `
+                self.addEventListener('install', event => {
+                    console.log('Service Worker installing...');
+                    self.skipWaiting();
+                });
+                
+                self.addEventListener('activate', event => {
+                    console.log('Service Worker activating...');
+                    event.waitUntil(self.clients.claim());
+                });
+                
+                self.addEventListener('fetch', event => {
+                    // Basic fetch handling for offline capability
+                    if (event.request.url.includes('/api/')) {
+                        event.respondWith(
+                            fetch(event.request).catch(() => {
+                                return new Response('Offline - API not available');
+                            })
+                        );
+                    }
+                });
+            `;
+            
+            const blob = new Blob([swCode], { type: 'application/javascript' });
+            const swUrl = URL.createObjectURL(blob);
+            
+            navigator.serviceWorker.register(swUrl)
+                .then(registration => {
+                    console.log('Service Worker registered successfully');
+                })
+                .catch(error => {
+                    console.log('Service Worker registration failed:', error);
+                });
+        }
+    </script>
+
+    <!-- Web App Manifest for PWA testing -->
+    <script>
+        // Create and inject a basic manifest for PWA testing
+        const manifest = {
+            name: "Lighthouse Debugging Tool",
+            short_name: "LighthouseDebug",
+            description: "A comprehensive tool for JavaScript debugging with Lighthouse",
+            start_url: "/",
+            display: "standalone",
+            background_color: "#2563eb",
+            theme_color: "#1e40af",
+            icons: [
+                {
+                    src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔍</text></svg>",
+                    sizes: "any",
+                    type: "image/svg+xml"
+                }
+            ]
+        };
+        
+        const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+        const manifestUrl = URL.createObjectURL(manifestBlob);
+        
+        const manifestLink = document.createElement('link');
+        manifestLink.rel = 'manifest';
+        manifestLink.href = manifestUrl;
+        document.head.appendChild(manifestLink);
+    </script>
+</body>
 </html>
